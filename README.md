@@ -1,36 +1,31 @@
 # BlackEdge Elite — Counter
 
-BlackEdge Elite is a virtual-credit blackjack simulator and interactive card-counting academy.
+Professional **play-money** blackjack practice and card-counting academy.
 
-## V21: rule-engine integration
+## V22 development milestone
 
-The Cloudflare Durable Object multiplayer server now imports `dealerShouldHit` and `settleHand` from `src/blackjack-rules.js`, so live table dealer drawing and hand settlement use the same shared rules functions exercised by `tests/blackjack-rules.test.js`. Current multiplayer settings stand on soft 17, pay natural blackjack 3:2, and use hit/stand/double.
+### Available code
+- Solo casino, counting academy, drills, same-device table, and online multiplayer prototype
+- Server-side rules engine for hit/stand/double, blackjack settlement and dealer S17
+- V22 multiplayer actions for two-hand splitting and late surrender, with hand-by-hand settlement
+- V22 insurance calculations and controls are **experimental and not yet casino-accurate**: the current dealer-blackjack peek occurs before players can purchase insurance. Do not rely on insurance practice until the opening-deal insurance phase is corrected.
+- Unit tests in `tests/`, including split/surrender regression scenarios, are committed but not yet confirmed passing by CI.
 
-### Verification
-- `npm run check` includes the rules module syntax check and both Node test suites.
-- GitHub Actions runs `npm run check` on pushes and pull requests.
-- GitHub commits have been verified; automated passing CI status and browser WebSocket end-to-end behavior must still be confirmed.
+### Simple product scope for the remaining builds
+1. **V23:** Correct game rules, proper insurance phase, split-ace restrictions, 3:2 payouts, configurable shoe and automated tests.
+2. **V24:** One intuitive casino table with premium visual design, animated cards/chips, large readable controls and responsive phone layout.
+3. **V25:** Guided tutorials inside the simulator, beginner-to-advanced counting exercises and exam mode.
+4. **V26:** Analytics, coaching accuracy, history, progress persistence and accessibility.
+5. **V27:** Multiplayer reliability, load/security and regression testing; only keep online play if stability meets criteria.
+6. **V28:** Final QA, bug fixes, release documentation, deployment and beta verification.
 
-### Run
+These are targets, not release guarantees. Online play and Cloudflare deployment are not yet production-certified.
+
+### Local developer workflow
 ```sh
 npm install
 npm run check
 npm run dev
 ```
-Open `/online.html` at the local Wrangler address to test online rooms. Cloudflare deployment has **not** occurred.
 
-### Project parts
-- `public/index.html`, `public/v13-academy.js`, `public/v14-practice-room.js`: browser-based table and counting lessons.
-- `public/online.html`: WebSocket multiplayer room client.
-- `src/worker.js`: multiplayer Durable Object server with saved seat, shoe, and bankroll checkpoints.
-- `src/blackjack-rules.js`: pure scoring, payouts, surrender/insurance calculation, split eligibility and dealer behavior.
-- `tests/*.test.js`: multiplayer state and blackjack rules tests.
-
-### Pending release blockers
-1. Integrate actual split-hand UI and full multi-hand settlement; surrender and insurance actions remain unimplemented on the live multiplayer table.
-2. Validate room restart consistency, token rotation and expiry, seat cleanup, atomic state updates, reconnect security and real WebSocket concurrency.
-3. Run end-to-end tests and check all CI results.
-4. Complete a full casino-rule matrix, strategy references, accessibility and browser QA.
-5. Deploy to an authorized Cloudflare account only after release gates pass.
-
-**This is a development build using virtual chips only. No real-money wagering.**
+The Cloudflare Worker and Durable Object service are not deployed. No real-money wagering or prizes.
