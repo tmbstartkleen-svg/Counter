@@ -1,9 +1,10 @@
+import {dealerShouldHit,settleHand} from './blackjack-rules.js';
 // Cloudflare Durable Object: server-authoritative virtual blackjack room.
 // Educational play money only. No payments, prizes, or persistent player identities.
 export default {
  async fetch(request,env){
   const url=new URL(request.url);
-  if(url.pathname==='/api/health')return json({ok:true,service:'blackedge-rooms-v18'});
+  if(url.pathname==='/api/health')return json({ok:true,service:'blackedge-rooms-v21'});
   const match=url.pathname.match(/^\/api\/rooms\/([a-zA-Z0-9_-]{4,40})\/ws$/);
   if(!match)return new Response('Not found',{status:404});
   if(request.headers.get('Upgrade')?.toLowerCase()!=='websocket')return new Response('WebSocket upgrade required',{status:426});
@@ -89,14 +90,12 @@ export class BlackjackRoom {
  finish(){
   this.phase='complete';if(this.dealer[1]&&!this.revealed){this.running+=count(this.dealer[1]);this.revealed=true}
   const eligible=[...this.players.values()].some(p=>p.wager&&score(p.cards)<=21);
-  while(eligible&&score(this.dealer)<17&&this.shoe.length)this.dealer.push(this.draw());
-  const d=score(this.dealer),dn=this.dealer.length===2&&d===21;
-  for(const p of this.players.values()){if(!p.wager)continue;const total=score(p.cards),pn=p.cards.length===2&&total===21;
-    if(total>21||(dn&&!pn))p.status='Loss';
-    else if(pn&&!dn){p.bank+=2.5*p.wager;p.status='Blackjack +3:2'}
-    else if(d>21||total>d){p.bank+=2*p.wager;p.status='Win'}
-    else if(total===d){p.bank+=p.wager;p.status='Push'}
-    else p.status='Loss';
+  while(eligible&&dealerShouldHit(this.dealer)&&this.shoe.length)this.dealer.push(this.draw());
+  for(const p of this.players.values()){
+    if(!p.wager)continue;
+    const outcome=settleHand({cards:p.cards,dealerCards:this.dealer,wager:p.wager});
+    p.bank+=outcome.payout;
+    p.status=outcome.result;
   }
   this.notice='Round complete. Host may deal again';this.broadcast();
  }
