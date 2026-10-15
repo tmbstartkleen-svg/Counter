@@ -1,24 +1,25 @@
-# BlackEdge Elite — Blackjack Training Platform
+# BlackEdge Elite — Counter
 
-BlackEdge Elite is a **play-money educational blackjack simulator** with finite-shoe card counting, virtual tables, interactive strategy coaching, and a counting academy.
+BlackEdge Elite is a play-money blackjack simulator and card-counting education project.
 
-## Latest local build: V12
+## Repository version (V12 Lite)
 
-The standalone V12 build contains:
-- Virtual casino table with simulated players and a shared shoe
-- Splitting, doubling, surrender, rule settings, table decisions and replay
-- Timed Hi-Lo running-count exams (20, 52, or 104 cards)
-- True-count conversion quizzes and a Bronze/Silver/Gold progress tracker
-- Local-only training progress and JSON export
+`index.html` is a browser-playable version featuring:
+- Finite shuffled card shoe with 1, 2, 6 or 8 decks
+- Three simulated tablemates, dealer hole card and natural-blackjack payout
+- Hit, stand and double using virtual credits
+- Visible Hi-Lo running / true count with hide-count practice
+- Timed counting drills, true-count conversion questions, progress tiers and JSON export
+- Responsive casino-styled interface
 
-**Current repository status:** project bootstrap. The full V12 HTML and source archive are delivered separately through the ChatGPT downloadable artifacts and still need to be imported into this repository. This README is not a claim that the full application has already been deployed.
+**Important:** This GitHub version is a streamlined V12 edition. The complete downloadable V12 package created in the ChatGPT session has additional features inherited from V11 (including split/surrender and decision journaling) that have **not** yet been merged here. Full rule-specific strategy validation and browser regression testing are pending.
 
-## Run locally after importing V12
+## Open locally
 
-Open `index.html` in a browser, or use a simple static server such as `python3 -m http.server 8000`.
+Download the repo and open `index.html` in a modern browser. Alternatively, serve it using `python3 -m http.server 8000`.
 
-## Upcoming
+To publish via GitHub Pages, enable Pages using **Deploy from a branch → main → /(root)** in repository Settings.
 
-Browser regression tests; authoritative strategy tables per selected casino rule set; professional graphics; synchronized multiplayer practice rooms; static deployment and release certification.
+## Safety
 
-**Education only. No real-money wagering or guarantee of casino outcomes.**
+Educational play-money simulator only. No real wagering, prediction guarantee or casino integration.
