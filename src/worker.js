@@ -3,7 +3,7 @@
 export default {
  async fetch(request,env){
   const url=new URL(request.url);
-  if(url.pathname==='/api/health')return json({ok:true,service:'blackedge-rooms-v16'});
+  if(url.pathname==='/api/health')return json({ok:true,service:'blackedge-rooms-v17'});
   const match=url.pathname.match(/^\/api\/rooms\/([a-zA-Z0-9_-]{4,40})\/ws$/);
   if(!match)return new Response('Not found',{status:404});
   if(request.headers.get('Upgrade')?.toLowerCase()!=='websocket')return new Response('WebSocket upgrade required',{status:426});
@@ -20,14 +20,16 @@ function count(c){return ['2','3','4','5','6'].includes(c.r)?1:['10','J','Q','K'
 export class BlackjackRoom {
  constructor(state,env){
   this.state=state;this.players=new Map();this.shoe=[];this.dealer=[];this.running=0;this.round=0;this.turn=0;this.phase='lobby';this.settings={decks:6};this.host=null;this.revealed=false;
+  this.state.blockConcurrencyWhile(async()=>{const saved=await this.state.storage.get('roomCheckpoint');if(saved&&saved.v===1){this.shoe=saved.shoe||[];this.round=saved.round||0;this.running=saved.running||0;this.settings=saved.settings||{decks:6};this.dealer=[];this.phase='lobby';this.notice='Room restored from durable checkpoint. Interrupted hands were canceled; reconnect to start a new round.'}});
  }
+ async checkpoint(){await this.state.storage.put('roomCheckpoint',{v:1,shoe:this.shoe,round:this.round,running:this.running,settings:this.settings,savedAt:Date.now()})}
  async fetch(request){
   const pair=new WebSocketPair(),client=pair[0],server=pair[1];server.accept();
   const id=crypto.randomUUID(),p={id,name:'Guest',cards:[],bank:1000,wager:25,status:'Waiting',socket:server};
   if(this.phase==='turn'){server.close(1008,'Round in progress; join between rounds');return new Response(null,{status:101,webSocket:client})}
   if(this.players.size>=4){server.close(1008,'Room full');return new Response(null,{status:101,webSocket:client})}
   this.players.set(id,p);if(!this.host)this.host=id;
-  server.addEventListener('message',event=>{try{if(typeof event.data!=='string'||event.data.length>4096)throw Error('Invalid message');const m=JSON.parse(event.data);this.action(p,m)}catch(e){this.send(p,{type:'error',message:String(e.message||e)})}});
+  server.addEventListener('message',async event=>{try{if(typeof event.data!=='string'||event.data.length>4096)throw Error('Invalid message');const m=JSON.parse(event.data);this.action(p,m);await this.checkpoint()}catch(e){this.send(p,{type:'error',message:String(e.message||e)})}});
   server.addEventListener('close',()=>this.leave(id));server.addEventListener('error',()=>this.leave(id));
   this.send(p,{type:'welcome',playerId:id});this.broadcast();
   return new Response(null,{status:101,webSocket:client});
