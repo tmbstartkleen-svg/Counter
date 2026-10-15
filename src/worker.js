@@ -32,7 +32,7 @@ export class BlackjackRoom {
   this.send(p,{type:'welcome',playerId:id});this.broadcast();
   return new Response(null,{status:101,webSocket:client});
  }
- leave(id){const p=this.players.get(id);if(!p)return;this.players.delete(id);if(this.host===id)this.host=this.players.keys().next().value||null;if(this.phase==='turn'){p.status='Disconnected';if(this.current()?.id===id)this.advance()}this.broadcast()}
+ leave(id){const p=this.players.get(id);if(!p)return;const wasCurrent=this.phase==='turn'&&this.current()?.id===id;const previousIndex=[...this.players.keys()].indexOf(id);this.players.delete(id);if(this.host===id)this.host=this.players.keys().next().value||null;if(this.phase==='turn'){if(wasCurrent){this.turn=previousIndex;this.skip()}else if(previousIndex>=0&&previousIndex<this.turn)this.turn=Math.max(0,this.turn-1);if(!this.players.size){this.phase='lobby';this.turn=0}}this.broadcast()}
  send(p,data){try{p.socket.send(JSON.stringify(data))}catch{}}
  publicState(viewer){const list=[...this.players.values()];return {type:'state',phase:this.phase,round:this.round,hostId:this.host,turnId:this.current()?.id||null,playerId:viewer.id,shoeRemaining:this.shoe.length,visibleRunningCount:this.running,players:list.map(p=>({id:p.id,name:p.name,cards:p.cards,bank:p.bank,status:p.status,wager:p.wager})),dealer:this.dealer.map((c,i)=>this.phase==='turn'&&i===1?{hidden:true}:c),message:this.notice||'Waiting for players'} }
  broadcast(){for(const p of this.players.values())this.send(p,this.publicState(p))}
