@@ -1,44 +1,36 @@
 # BlackEdge Elite — Counter
 
-Educational, play-money blackjack and card-counting simulator.
+BlackEdge Elite is a virtual-credit blackjack simulator and interactive card-counting academy.
 
-## V19 online room verification milestone
+## V21: rule-engine integration
 
-- `index.html` / `public/index.html`: casino, counting drills, and navigation.
-- `v13-academy.js`: advanced count and discard-tray drills.
-- `v14-practice-room.js`: local pass-and-play practice.
-- `src/worker.js`: Cloudflare Worker and Durable Object multiplayer game server.
-- `online.html` / `public/online.html`: cross-device WebSocket client.
+The Cloudflare Durable Object multiplayer server now imports `dealerShouldHit` and `settleHand` from `src/blackjack-rules.js`, so live table dealer drawing and hand settlement use the same shared rules functions exercised by `tests/blackjack-rules.test.js`. Current multiplayer settings stand on soft 17, pay natural blackjack 3:2, and use hit/stand/double.
 
-### V18–V19 changes
+### Verification
+- `npm run check` includes the rules module syntax check and both Node test suites.
+- GitHub Actions runs `npm run check` on pushes and pull requests.
+- GitHub commits have been verified; automated passing CI status and browser WebSocket end-to-end behavior must still be confirmed.
 
-The Durable Object now checkpoints **player seat IDs, names, recovery tokens, practice bankrolls, shoe and round counts**. A new WebSocket connection sends `resume` with the token saved in that browser's **sessionStorage**, or `join` to reserve a new seat. Connections cannot impersonate an active seat merely by choosing the same name. Offline seats no longer place new bets. On server restart, active hands are canceled and the shoe reshuffled; this is **not** a continuation of a half-completed hand.
-
-### V19 test automation
-
-- `tests/rooms.test.js` adds eight Node.js regression tests for joining, invalid/resumed tokens, seat limits, hidden-card counting, host rules and durable snapshots.
-- `.github/workflows/verify.yml` runs `npm run check` on pushes and pull requests.
-- These are **unit-level state tests**. Cloudflare Durable Object integration, persistence after restart, real WebSocket concurrency, and browser end-to-end tests are still required.
-
-### Run locally
-
+### Run
 ```sh
 npm install
 npm run check
 npm run dev
 ```
+Open `/online.html` at the local Wrangler address to test online rooms. Cloudflare deployment has **not** occurred.
 
-Open `/online.html` under Wrangler's local URL. Online play needs Cloudflare Workers and Durable Objects; GitHub Pages only serves static content.
+### Project parts
+- `public/index.html`, `public/v13-academy.js`, `public/v14-practice-room.js`: browser-based table and counting lessons.
+- `public/online.html`: WebSocket multiplayer room client.
+- `src/worker.js`: multiplayer Durable Object server with saved seat, shoe, and bankroll checkpoints.
+- `src/blackjack-rules.js`: pure scoring, payouts, surrender/insurance calculation, split eligibility and dealer behavior.
+- `tests/*.test.js`: multiplayer state and blackjack rules tests.
 
-### Known limitations
+### Pending release blockers
+1. Integrate actual split-hand UI and full multi-hand settlement; surrender and insurance actions remain unimplemented on the live multiplayer table.
+2. Validate room restart consistency, token rotation and expiry, seat cleanup, atomic state updates, reconnect security and real WebSocket concurrency.
+3. Run end-to-end tests and check all CI results.
+4. Complete a full casino-rule matrix, strategy references, accessibility and browser QA.
+5. Deploy to an authorized Cloudflare account only after release gates pass.
 
-**V19 is a development prototype; it has not been deployed or browser-regression-tested.**
-- Tokens are bearer credentials kept in sessionStorage: there is no authenticated user identity, token rotation, encrypted session management, or recovery if the tab's session storage is lost. Possession of a room code does not provide security.
-- Each room allows four reserved seats; expired/abandoned seats cannot yet be freed through a secure leave/timeout operation.
-- Player bankroll updates and active rounds do not have complete crash-safe, atomic recovery; actions and checkpoints need serialization and idempotency tests.
-- Socket reattachment is not hibernation-based. Validate Cloudflare object lifecycle, concurrency, and disconnect behavior before launch.
-- Online rules do not yet include splits, surrender, insurance or a verified full strategy matrix.
-- The standalone full V13 HTML included features not yet merged into the GitHub Lite casino.
-- Virtual practice only: no money, prizes or cash-out.
-
-No production deployment has been performed. Production signoff requires server state-machine tests, reconnect tests, WebSocket integration tests, and security review.
+**This is a development build using virtual chips only. No real-money wagering.**
