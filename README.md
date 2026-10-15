@@ -1,31 +1,31 @@
 # BlackEdge Elite — Counter
 
-Professional **play-money** blackjack practice and card-counting academy.
+A casino-style, play-money blackjack simulator and card-counting academy.
 
-## V22 development milestone
+## V24 — Premium Casino UI
 
-### Available code
-- Solo casino, counting academy, drills, same-device table, and online multiplayer prototype
-- Server-side rules engine for hit/stand/double, blackjack settlement and dealer S17
-- V22 multiplayer actions for two-hand splitting and late surrender, with hand-by-hand settlement
-- V22 insurance calculations and controls are **experimental and not yet casino-accurate**: the current dealer-blackjack peek occurs before players can purchase insurance. Do not rely on insurance practice until the opening-deal insurance phase is corrected.
-- Unit tests in `tests/`, including split/surrender regression scenarios, are committed but not yet confirmed passing by CI.
+- `public/v24-casino.css` introduces dark emerald, gold, elegant typography, high-contrast controls, readable cards and more spacious tables.
+- Main casino and online-room interfaces load the same theme.
+- Navigation emphasizes **Play Casino, Learn Blackjack, Card Counting, My Progress**.
+- Responsive layouts and reduced-motion accessibility preferences are supported.
+- The same stylesheet and page markup are retained at repo root for local standalone use.
 
-### Simple product scope for the remaining builds
-1. **V23:** Correct game rules, proper insurance phase, split-ace restrictions, 3:2 payouts, configurable shoe and automated tests.
-2. **V24:** One intuitive casino table with premium visual design, animated cards/chips, large readable controls and responsive phone layout.
-3. **V25:** Guided tutorials inside the simulator, beginner-to-advanced counting exercises and exam mode.
-4. **V26:** Analytics, coaching accuracy, history, progress persistence and accessibility.
-5. **V27:** Multiplayer reliability, load/security and regression testing; only keep online play if stability meets criteria.
-6. **V28:** Final QA, bug fixes, release documentation, deployment and beta verification.
+### Development status
 
-These are targets, not release guarantees. Online play and Cloudflare deployment are not yet production-certified.
+V24 is a **styling and usability pass**, not a fully illustrated 3D casino. There is no real-time dealer avatar yet. JavaScript and browser end-to-end checks, mobile layout QA, blackjack rules regression, and online multiplayer infrastructure validation must pass before launch.
 
-### Local developer workflow
+### Remaining roadmap
+
+- **V25:** In-table tutorials and guided card-counting practice.
+- **V26:** Personalized coaching, exam progress, session history and accessibility.
+- **V27:** Multiplayer hardening, automated end-to-end and rule correctness tests.
+- **V28:** Final polish, deployment and beta verification.
+
+### Local development
 ```sh
 npm install
 npm run check
 npm run dev
 ```
 
-The Cloudflare Worker and Durable Object service are not deployed. No real-money wagering or prizes.
+Online rooms require a Cloudflare Worker and Durable Object; GitHub Pages does not provide the multiplayer server. No production deployment has been performed. Virtual credits only—no wagering or prizes.
