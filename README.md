@@ -1,21 +1,33 @@
-# BlackEdge Elite — V27 Reliability
+# BlackEdge Elite — V28 Beta Readiness Audit
 
-Virtual-credit blackjack simulator and training academy.
+BlackEdge Elite is a virtual-credit blackjack practice and counting academy.
 
-## V27 changes
+## V28 source changes
 
-- Hide the dealer hole card during the insurance decision and ordinary player turns.
-- Forbid new room joins while insurance is in progress.
-- Prevent dealer drawing extra cards after an initial natural blackjack.
-- Add `tests/v27-regression.test.js` with five focused regression scenarios.
-- Set the package version to `0.27.0`.
+- Improved multiplayer disconnect handling: when a seated player drops during insurance, their undecided insurance choice is automatically declined so the other players are not indefinitely blocked.
+- Added two regression scenarios in `tests/v28-disconnect.test.js`.
+- Bumped package version to `0.28.0`.
+- V24 visual theme, V25 in-table lessons, V26 progress module and V27 dealer-card security fixes remain in the repository.
 
-## Verification
+## Release gate: NOT YET PASSED
 
-Source commits have been verified. End-to-end browser tests and passing automated CI have NOT yet been confirmed. A direct local clone could not run because network DNS resolution was unavailable in the execution environment. Run `npm run check` in GitHub Actions or locally before any deployment. Cloudflare online multiplayer remains unverified and undeployed.
+This milestone is **not a production certification or deployment**. GitHub source changes are verified; full test execution is not verified in this environment. A local GitHub clone attempt failed because github.com DNS could not resolve.
 
-## Next milestone
+Remaining before public beta:
 
-V28 is the final *planned* beta-readiness phase: run all tests, repair any failures, check mobile layouts, validate casino rules, review seat-token security, and perform an authorized staging deployment. V28 is a target, not a guarantee of release approval.
+1. Confirm `npm run check` succeeds on the exact main commit; repair every failing test.
+2. Complete WebSocket and Durable Object restart/integration tests, including multiple clients, disconnects, rejoin and transactional checkpointing.
+3. Audit seat recovery bearer tokens, token expiry/rotation, abandoned-seat cleanup, stale connections and host handoff.
+4. Fix and verify casino-rule edge cases (dealer peek, double after splitting, insurance eligibility, configurable wagers, resplit policy, partial-hand crash refunds).
+5. Confirm the V24–V26 modules operate in the rendered pages and perform responsive mobile and accessibility QA.
+6. Deploy an authorized Cloudflare staging environment only after checks pass, then conduct real cross-device beta sessions.
 
-No real-money wagering or prizes.
+### Developer commands
+
+```sh
+npm install
+npm run check
+npm run dev
+```
+
+The remaining tasks are release blockers, not optional stretch features. Development iterations may extend beyond V28. All credits are fictional; no real-money bets or prizes.
