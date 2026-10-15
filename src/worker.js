@@ -20,7 +20,7 @@ function score(cards){let total=0,aces=0;for(const c of cards){if(c.r==='A'){tot
 function count(c){return ['2','3','4','5','6'].includes(c.r)?1:['10','J','Q','K','A'].includes(c.r)?-1:0}
 export class BlackjackRoom {
  constructor(state,env){
-  this.state=state;this.players=new Map();this.shoe=[];this.dealer=[];this.running=0;this.round=0;this.turn=0;this.phase='lobby';this.settings={decks:6};this.host=null;this.revealed=false;this.sessions=new Map();
+  this.state=state;this.players=new Map();this.shoe=[];this.dealer=[];this.running=0;this.round=0;this.turn=0;this.phase='lobby';this.settings={decks:6};this.host=null;this.revealed=false;this.sessions=new Map();this.insuranceDecided=new Set();
   this.state.blockConcurrencyWhile(async()=>{const saved=await this.state.storage.get('roomCheckpoint');if(saved&&saved.v===1){this.shoe=saved.shoe||[];this.players=new Map((saved.seats||[]).map(p=>[p.id,{...p,socket:null}]));this.host=saved.host||null;this.round=saved.round||0;this.running=saved.running||0;this.settings=saved.settings||{decks:6};this.dealer=[];this.phase='lobby';if(saved.phase==='turn'){this.resetShoe();for(const p of this.players.values()){if(p.wager&&p.status==='Playing')p.bank+=p.wager;p.wager=0;p.cards=[];p.status='Interrupted'}}this.notice='Room restored from durable checkpoint. Interrupted hands were canceled; reconnect to start a new round.'}});
  }
  async checkpoint(){await this.state.storage.put('roomCheckpoint',{v:1,shoe:this.shoe,round:this.round,running:this.running,settings:this.settings,phase:this.phase,host:this.host,seats:[...this.players.values()].map(({socket,...p})=>p),savedAt:Date.now()})}
@@ -70,18 +70,28 @@ export class BlackjackRoom {
  action(p,m){
   if(!m||typeof m.type!=='string')throw Error('Action missing');
   if(m.type==='name'){if(this.phase!=='lobby'&&this.phase!=='complete')throw Error('Wait for the round');const name=String(m.name||'').trim().slice(0,24);if(!/^[a-zA-Z0-9 _-]{1,24}$/.test(name))throw Error('Name must use letters, numbers, spaces');p.name=name;this.broadcast();return}
-  if(m.type==='start'){if(this.host!==p.id)throw Error('Only host can deal');if(this.phase==='turn')throw Error('Round underway');if(![...this.players.values()].some(v=>v.socket))throw Error('No connected players');this.startRound();return}
+  if(m.type==='start'){if(this.host!==p.id)throw Error('Only host can deal');if(this.phase==='turn'||this.phase==='insurance')throw Error('Round underway');if(![...this.players.values()].some(v=>v.socket))throw Error('No connected players');this.startRound();return}
+  if(this.phase==='insurance'){
+   if(!['insurance','declineInsurance'].includes(m.type)||!p.wager||this.insuranceDecided.has(p.id))throw Error('Insurance decision unavailable');
+   if(m.type==='insurance'){const amount=p.wager/2;if(p.bank<amount)throw Error('Insufficient chips');p.bank-=amount;p.insurance=amount}
+   this.insuranceDecided.add(p.id);
+   if([...this.players.values()].filter(v=>v.wager).every(v=>this.insuranceDecided.has(v.id))){
+    if(score(this.dealer)===21)this.finish();
+    else{this.phase='turn';this.turn=0;this.skip();this.broadcast()}
+   }else this.broadcast();
+   return;
+  }
   if(this.phase!=='turn'||this.current()?.id!==p.id)throw Error('Not your turn');
   if(m.type==='hit'){p.cards.push(this.draw());if(score(p.cards)>=21){p.status=score(p.cards)>21?'Bust':'Done';this.nextHand(p)}else this.broadcast();return}
   if(m.type==='stand'){p.status='Stand';this.nextHand(p);return}
   if(m.type==='double'){if(p.cards.length!==2||p.bank<p.wager)throw Error('Double unavailable');p.bank-=p.wager;p.wager*=2;p.cards.push(this.draw());p.status=score(p.cards)>21?'Bust':'Doubled';this.nextHand(p);return}
   if(m.type==='surrender'){if(p.hands||!canSurrender({cards:p.cards}))throw Error('Surrender unavailable');p.status='Surrender';this.nextHand(p);return}
-  if(m.type==='insurance'){if(this.dealer[0]?.r!=='A'||p.insurance||p.cards.length!==2||p.status!=='Playing')throw Error('Insurance unavailable');const amount=p.wager/2;if(p.bank<amount)throw Error('Insufficient chips');p.bank-=amount;p.insurance=amount;this.broadcast();return}
+  
   if(m.type==='split'){
    if(p.hands||!canSplit(p.cards)||p.bank<p.wager)throw Error('Split unavailable');
    p.bank-=p.wager;const [a,b]=p.cards;
    p.hands=[{cards:[a,this.draw()],wager:p.wager,status:'Playing',splitHand:true},{cards:[b,this.draw()],wager:p.wager,status:'Playing',splitHand:true}];
-   p.activeHand=0;p.cards=p.hands[0].cards;p.status='Playing';this.broadcast();return
+   p.activeHand=0;p.cards=p.hands[0].cards;p.status='Playing';if(a.r==='A'){p.hands[0].status='Stand';p.hands[1].status='Stand';p.status='Stand';this.nextHand(p)}else this.broadcast();return
   }
   throw Error('Unsupported action');
  }
@@ -93,9 +103,10 @@ export class BlackjackRoom {
  }
  startRound(){
   if(this.shoe.length<70)this.resetShoe();
-  this.phase='turn';this.turn=0;this.round++;this.dealer=[];this.revealed=false;this.notice='Player decisions';
+  this.phase='turn';this.turn=0;this.round++;this.dealer=[];this.revealed=false;this.insuranceDecided=new Set();this.notice='Player decisions';
   for(const p of this.players.values()){p.cards=[];p.hands=null;p.activeHand=0;p.insurance=0;p.wager=p.socket?Math.min(25,p.bank):0;p.bank-=p.wager;p.status=p.wager?'Playing':p.socket?'Out of chips':'Offline'}
   for(let i=0;i<2;i++){for(const p of this.players.values())if(p.status==='Playing')p.cards.push(this.draw());this.dealer.push(this.draw(i===1))}
+  if(this.dealer[0]?.r==='A'){this.phase='insurance';this.notice='Dealer shows Ace: take or decline insurance';this.broadcast();return}
   if(score(this.dealer)===21){this.finish();return}
   this.skip();this.broadcast();
  }
