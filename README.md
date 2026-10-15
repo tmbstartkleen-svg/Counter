@@ -1,33 +1,21 @@
-# BlackEdge Elite — Counter
+# BlackEdge Elite — V27 Reliability
 
-Premium casino-style, play-money blackjack simulator with an embedded card-counting academy.
+Virtual-credit blackjack simulator and training academy.
 
-## V25: Guided Table Academy
+## V27 changes
 
-The main casino now loads `v25-guided.js`. It adds:
+- Hide the dealer hole card during the insurance decision and ordinary player turns.
+- Forbid new room joins while insurance is in progress.
+- Prevent dealer drawing extra cards after an initial natural blackjack.
+- Add `tests/v27-regression.test.js` with five focused regression scenarios.
+- Set the package version to `0.27.0`.
 
-- Optional in-table lessons responding to visible player cards and dealer upcard.
-- Guided explanation of hard hands, Aces, matching cards and observable information.
-- A practice check for counting **currently visible cards** at the table (not the historical running shoe count).
-- Local accuracy tracking and accessibility-friendly feedback.
-- Preserved V24 emerald/gold visual design and previous counting lessons.
+## Verification
 
-The new coaching module is **basic orientation, not a validated complete basic-strategy recommender**. Existing casino implementation and blackjack variants still require thorough rules testing.
+Source commits have been verified. End-to-end browser tests and passing automated CI have NOT yet been confirmed. A direct local clone could not run because network DNS resolution was unavailable in the execution environment. Run `npm run check` in GitHub Actions or locally before any deployment. Cloudflare online multiplayer remains unverified and undeployed.
 
-## Remaining planned builds
+## Next milestone
 
-- **V26:** Comprehensive rule-specific coach, useful progress metrics and accessibility.
-- **V27:** Multiplayer hardening, automated rule/browser tests, persistence and security.
-- **V28:** Release polish, mobile QA, Cloudflare beta deployment if testing gates pass.
+V28 is the final *planned* beta-readiness phase: run all tests, repair any failures, check mobile layouts, validate casino rules, review seat-token security, and perform an authorized staging deployment. V28 is a target, not a guarantee of release approval.
 
-Target: three major planned builds following V25; additional bug-fix iterations may be necessary.
-
-## Local development
-
-```sh
-npm install
-npm run check
-npm run dev
-```
-
-The online-room backend is not deployed. GitHub commits confirm source changes, not successful browser testing or production certification. Virtual credits only; no real-money wagering.
+No real-money wagering or prizes.
