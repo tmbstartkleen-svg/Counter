@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {handValue,dealerShouldHit,canSplit,canSurrender,settleHand,settleInsurance} from '../src/blackjack-rules.js';
+test('ace totals, soft and hard 17',()=>{assert.deepEqual(handValue(['A','6']).soft,true);assert.equal(handValue(['A','6','K']).soft,false);assert.equal(handValue(['A','A','9']).total,21)});
+test('dealer S17/H17 configurable',()=>{assert.equal(dealerShouldHit(['A','6']),false);assert.equal(dealerShouldHit(['A','6'],{hitSoft17:true}),true);assert.equal(dealerShouldHit(['K','7'],{hitSoft17:true}),false)});
+test('blackjack pays 3:2 for 25 unit wager',()=>assert.deepEqual(settleHand({cards:['A','K'],dealerCards:['10','9'],wager:25}),{result:'blackjack',payout:62.5,net:37.5}));
+test('dealer and player blackjack push',()=>assert.equal(settleHand({cards:['A','K'],dealerCards:['A','J'],wager:25}).net,0));
+test('split 21 does not get natural payout',()=>assert.equal(settleHand({cards:['A','K'],dealerCards:['9','9'],wager:25,splitHand:true}).net,25));
+test('bust always loses even when dealer busts',()=>assert.equal(settleHand({cards:['K','8','7'],dealerCards:['K','7','8'],wager:25}).net,-25));
+test('surrender returns half stake',()=>assert.equal(settleHand({cards:['10','6'],dealerCards:['10','8'],wager:25,surrender:true}).payout,12.5));
+test('insurance pays 2:1 net on dealer natural',()=>assert.equal(settleInsurance({insuranceWager:10,dealerCards:['A','K']}).net,20));
+test('insurance loses on non-natural',()=>assert.equal(settleInsurance({insuranceWager:10,dealerCards:['A','9']}).net,-10));
+test('splitting matching 10-value ranks',()=>{assert.equal(canSplit(['K','10']),true);assert.equal(canSplit(['A','6']),false)});
+test('late surrender requires original hand',()=>{assert.equal(canSurrender({cards:['9','7']}),true);assert.equal(canSurrender({cards:['9','7'],afterSplit:true}),false)});
+test('randomized hands always evaluate within physical bounds',()=>{const r=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];for(let i=0;i<3000;i++){const cards=Array.from({length:2+i%5},(_,j)=>r[(i*17+j*7)%13]);const h=handValue(cards);assert.ok(h.total>=4&&h.total<=77)}});
