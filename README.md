@@ -1,31 +1,33 @@
 # BlackEdge Elite — Counter
 
-A casino-style, play-money blackjack simulator and card-counting academy.
+Premium casino-style, play-money blackjack simulator with an embedded card-counting academy.
 
-## V24 — Premium Casino UI
+## V25: Guided Table Academy
 
-- `public/v24-casino.css` introduces dark emerald, gold, elegant typography, high-contrast controls, readable cards and more spacious tables.
-- Main casino and online-room interfaces load the same theme.
-- Navigation emphasizes **Play Casino, Learn Blackjack, Card Counting, My Progress**.
-- Responsive layouts and reduced-motion accessibility preferences are supported.
-- The same stylesheet and page markup are retained at repo root for local standalone use.
+The main casino now loads `v25-guided.js`. It adds:
 
-### Development status
+- Optional in-table lessons responding to visible player cards and dealer upcard.
+- Guided explanation of hard hands, Aces, matching cards and observable information.
+- A practice check for counting **currently visible cards** at the table (not the historical running shoe count).
+- Local accuracy tracking and accessibility-friendly feedback.
+- Preserved V24 emerald/gold visual design and previous counting lessons.
 
-V24 is a **styling and usability pass**, not a fully illustrated 3D casino. There is no real-time dealer avatar yet. JavaScript and browser end-to-end checks, mobile layout QA, blackjack rules regression, and online multiplayer infrastructure validation must pass before launch.
+The new coaching module is **basic orientation, not a validated complete basic-strategy recommender**. Existing casino implementation and blackjack variants still require thorough rules testing.
 
-### Remaining roadmap
+## Remaining planned builds
 
-- **V25:** In-table tutorials and guided card-counting practice.
-- **V26:** Personalized coaching, exam progress, session history and accessibility.
-- **V27:** Multiplayer hardening, automated end-to-end and rule correctness tests.
-- **V28:** Final polish, deployment and beta verification.
+- **V26:** Comprehensive rule-specific coach, useful progress metrics and accessibility.
+- **V27:** Multiplayer hardening, automated rule/browser tests, persistence and security.
+- **V28:** Release polish, mobile QA, Cloudflare beta deployment if testing gates pass.
 
-### Local development
+Target: three major planned builds following V25; additional bug-fix iterations may be necessary.
+
+## Local development
+
 ```sh
 npm install
 npm run check
 npm run dev
 ```
 
-Online rooms require a Cloudflare Worker and Durable Object; GitHub Pages does not provide the multiplayer server. No production deployment has been performed. Virtual credits only—no wagering or prizes.
+The online-room backend is not deployed. GitHub commits confirm source changes, not successful browser testing or production certification. Virtual credits only; no real-money wagering.
