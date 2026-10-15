@@ -1,50 +1,37 @@
 # BlackEdge Elite — Counter
 
-BlackEdge Elite is an **educational play-money** blackjack training app.
+Educational, play-money blackjack and card-counting simulator.
 
-## V17 persistence checkpoint (committed)
+## V18 online room development
 
-### Casino and counting academy
-- `index.html` includes the browser casino game, Hi-Lo practice and timed drills.
-- `v13-academy.js` includes discard-tray and true-count calculations.
-- `v14-practice-room.js` includes 1–4 player same-device, pass-and-play practice.
+- `index.html` / `public/index.html`: casino, counting drills, and navigation.
+- `v13-academy.js`: advanced count and discard-tray drills.
+- `v14-practice-room.js`: local pass-and-play practice.
+- `src/worker.js`: Cloudflare Worker and Durable Object multiplayer game server.
+- `online.html` / `public/online.html`: cross-device WebSocket client.
 
-### V15/V16 online room prototype
-- `online.html` is a cross-device WebSocket room UI.
-- `src/worker.js` implements server-controlled shared shoe, dealer cards, virtual bankroll, round settlement, room host and turn order using a Cloudflare Durable Object.
-- `wrangler.jsonc` configures the Worker and Durable Object.
-- `public/` contains assets served by the Worker.
+### V18 changes
 
-The online service is **not deployed** or browser-regression-tested. A plain GitHub Pages site will not run the WebSocket backend.
+The Durable Object now checkpoints **player seat IDs, names, recovery tokens, practice bankrolls, shoe and round counts**. A new WebSocket connection sends `resume` with the token saved in that browser's **sessionStorage**, or `join` to reserve a new seat. Connections cannot impersonate an active seat merely by choosing the same name. Offline seats no longer place new bets. On server restart, active hands are canceled and the shoe reshuffled; this is **not** a continuation of a half-completed hand.
 
-### Develop with Cloudflare
+### Run locally
 
-1. Install Node.js 20+ and run `npm install`.
-2. Run `npm run dev` to start a local Cloudflare Worker + static assets.
-3. Open `/online.html` on two browser tabs or devices to test joining the same room code.
-4. Configure a Cloudflare account and deploy with `npm run deploy` once ready.
+```sh
+npm install
+npm run dev
+```
 
-### V16 reliability changes
-- Reject new WebSocket seats while a round is underway.
-- Correct seat-index advancement when a participant disconnects.
-- Guard the dealer hole-card counting update so it occurs once per round.
-- Update the health endpoint version to V16.
+Open `/online.html` under Wrangler's local URL. Online play needs Cloudflare Workers and Durable Objects; GitHub Pages only serves static content.
 
-### V17 checkpoint changes
-- Persist shuffled shoe and round number with Durable Object storage after WebSocket actions.
-- Restore saved shoe/count after cold start for completed rounds; detect interrupted rounds and reshuffle.
-- This is **checkpointing**, not full reconnect-safe persistence; seats and balances remain ephemeral.
+### Known limitations
 
-### Known limitations and required hardening
+**V18 is a development prototype; it has not been deployed or browser-regression-tested.**
+- Tokens are bearer credentials kept in sessionStorage: there is no authenticated user identity, token rotation, encrypted session management, or recovery if the tab's session storage is lost. Possession of a room code does not provide security.
+- Each room allows four reserved seats; expired/abandoned seats cannot yet be freed through a secure leave/timeout operation.
+- Player bankroll updates and active rounds do not have complete crash-safe, atomic recovery; actions and checkpoints need serialization and idempotency tests.
+- Socket reattachment is not hibernation-based. Validate Cloudflare object lifecycle, concurrency, and disconnect behavior before launch.
+- Online rules do not yet include splits, surrender, insurance or a verified full strategy matrix.
+- The standalone full V13 HTML included features not yet merged into the GitHub Lite casino.
+- Virtual practice only: no money, prizes or cash-out.
 
-- V17 writes a durable **shoe/round checkpoint** to Durable Object storage. On a restart during a hand, it cancels the unfinished hand and reshuffles instead of resuming unsettled wagers. **Player identities, bankrolls, live sockets, and secure rejoining are not persisted**; full state durability and WebSocket hibernation are still required before production.
-- No verified user identities, anti-abuse controls, room access passwords, secure reconnection or invite expiry.
-- Mid-round admission is blocked, but full seat identity/rejoin persistence is not yet available.
-- No complete configurable blackjack rule matrix. Online practice currently uses hit, stand, double, 3:2 natural blackjack and dealer stand-on-17.
-- Previous full standalone editions had features (including split and surrender) not fully ported into this GitHub release.
-- End-to-end multiplayer browser testing and independent rules-engine correctness tests are still needed.
-- No payments or real-money wagering.
-
-## Source status
-
-The GitHub repo is the V17 **development edition on main**, not a production-certified release. V17 GitHub commits were verified, but Cloudflare deployment has not occurred.
+No production deployment has been performed. Production signoff requires server state-machine tests, reconnect tests, WebSocket integration tests, and security review.
