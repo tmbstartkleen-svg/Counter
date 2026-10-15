@@ -91,7 +91,7 @@ export class BlackjackRoom {
    if(p.hands||!canSplit(p.cards)||p.bank<p.wager)throw Error('Split unavailable');
    p.bank-=p.wager;const [a,b]=p.cards;
    p.hands=[{cards:[a,this.draw()],wager:p.wager,status:'Playing',splitHand:true},{cards:[b,this.draw()],wager:p.wager,status:'Playing',splitHand:true}];
-   p.activeHand=0;p.cards=p.hands[0].cards;p.status='Playing';if(a.r==='A'){p.hands[0].status='Stand';p.hands[1].status='Stand';p.status='Stand';this.nextHand(p)}else this.broadcast();return
+   p.activeHand=0;p.cards=p.hands[0].cards;p.status='Playing';if(a.r==='A'){p.hands[0].status='Stand';p.hands[1].status='Stand';p.activeHand=1;p.cards=p.hands[1].cards;p.status='Stand';this.advance()}else this.broadcast();return
   }
   throw Error('Unsupported action');
  }
