@@ -1,32 +1,39 @@
 # BlackEdge Elite — Counter
 
-BlackEdge Elite is an educational **play-money** blackjack and card-counting training platform.
+BlackEdge Elite is an **educational play-money** blackjack training app.
 
-## V14 Lite (GitHub edition)
+## V15 development milestone (committed)
 
-Open `index.html` in a modern browser or use `python3 -m http.server 8000`.
+### Casino and counting academy
+- `index.html` includes the browser casino game, Hi-Lo practice and timed drills.
+- `v13-academy.js` includes discard-tray and true-count calculations.
+- `v14-practice-room.js` includes 1–4 player same-device, pass-and-play practice.
 
-### Available
+### V15 online room prototype
+- `online.html` is a cross-device WebSocket room UI.
+- `src/worker.js` implements server-controlled shared shoe, dealer cards, virtual bankroll, round settlement, room host and turn order using a Cloudflare Durable Object.
+- `wrangler.jsonc` configures the Worker and Durable Object.
+- `public/` contains assets served by the Worker.
 
-- Casino practice with finite shuffled shoe and three simulated tablemates.
-- Hi-Lo running and true-count practice, hidden count, timed drills and academy levels.
-- V13 discard-tray estimation and true-count exercises.
-- **V14 Shared-table Practice Room:** 1–4 human participants on **one shared device**, pass-and-play seating, one shoe, face-down dealer hole card, hit/stand/double, virtual bankrolls, per-round results and count visibility toggle. No real-money betting.
+The online service is **not deployed** or browser-regression-tested. A plain GitHub Pages site will not run the WebSocket backend.
 
-### Not yet available
+### Develop with Cloudflare
 
-- **Internet multiplayer is NOT implemented.** V14 is local pass-and-play only. Online room creation, authentication, server-authoritative shuffling, WebSocket sync, disconnect/rejoin, reconnection and security testing are still needed.
-- The comprehensive standalone V13 casino features have not all been merged into GitHub. This repository's casino remains Lite (e.g., split and surrender are still missing here).
-- Browser end-to-end regression testing, exhaustive rules testing, and Cloudflare deployment.
+1. Install Node.js 20+ and run `npm install`.
+2. Run `npm run dev` to start a local Cloudflare Worker + static assets.
+3. Open `/online.html` on two browser tabs or devices to test joining the same room code.
+4. Configure a Cloudflare account and deploy with `npm run deploy` once ready.
 
-### Notes on casino rules
+### Known limitations and required hardening
 
-The V14 room is a training prototype: fixed 25-chip virtual wagers, dealer stands on all 17s, standard blackjack pays 3:2, no insurance or splitting, no surrender. Blackjack payouts assume natural hands only, and simultaneous naturals push. Chips have no monetary value.
+- V15 uses **in-memory** room state and should not be trusted to survive Durable Object restarts. Add persistent storage and WebSocket hibernation handling before production.
+- No verified user identities, anti-abuse controls, room access passwords, secure reconnection or invite expiry.
+- Joining while a hand is underway is prototype behavior; seat membership should be frozen for each round.
+- No complete configurable blackjack rule matrix. Online practice currently uses hit, stand, double, 3:2 natural blackjack and dealer stand-on-17.
+- Previous full standalone editions had features (including split and surrender) not fully ported into this GitHub release.
+- End-to-end multiplayer browser testing and independent rules-engine correctness tests are still needed.
+- No payments or real-money wagering.
 
-## Deployment
+## Source status
 
-For simple static preview, enable GitHub Pages from **Settings → Pages → Deploy from a branch → main / (root)**. Online multiplayer requires a suitable backend, such as Cloudflare Workers with Durable Objects, and explicit integration tests.
-
-## Safety
-
-Educational simulation only. Card counting is not a guarantee of winning and may be restricted by individual casinos.
+The GitHub repo is the V15 **development branch equivalent on main**, not a production-certified release. V15 GitHub commits were verified, but Cloudflare deployment has not occurred.
