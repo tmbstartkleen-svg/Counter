@@ -1,10 +1,10 @@
-import {dealerShouldHit,settleHand,settleInsurance,canSurrender,canSplit} from './blackjack-rules.js';
+import {dealerShouldHit,settleHand,settleInsurance,canSurrender,canSplit,handValue} from './blackjack-rules.js';
 // Cloudflare Durable Object: server-authoritative virtual blackjack room.
 // Educational play money only. No payments, prizes, or persistent player identities.
 export default {
  async fetch(request,env){
   const url=new URL(request.url);
-  if(url.pathname==='/api/health')return json({ok:true,service:'blackedge-rooms-v22'});
+  if(url.pathname==='/api/health')return json({ok:true,service:'blackedge-rooms-v27'});
   const match=url.pathname.match(/^\/api\/rooms\/([a-zA-Z0-9_-]{4,40})\/ws$/);
   if(!match)return new Response('Not found',{status:404});
   if(request.headers.get('Upgrade')?.toLowerCase()!=='websocket')return new Response('WebSocket upgrade required',{status:426});
@@ -21,7 +21,7 @@ function count(c){return ['2','3','4','5','6'].includes(c.r)?1:['10','J','Q','K'
 export class BlackjackRoom {
  constructor(state,env){
   this.state=state;this.players=new Map();this.shoe=[];this.dealer=[];this.running=0;this.round=0;this.turn=0;this.phase='lobby';this.settings={decks:6};this.host=null;this.revealed=false;this.sessions=new Map();this.insuranceDecided=new Set();
-  this.state.blockConcurrencyWhile(async()=>{const saved=await this.state.storage.get('roomCheckpoint');if(saved&&saved.v===1){this.shoe=saved.shoe||[];this.players=new Map((saved.seats||[]).map(p=>[p.id,{...p,socket:null}]));this.host=saved.host||null;this.round=saved.round||0;this.running=saved.running||0;this.settings=saved.settings||{decks:6};this.dealer=[];this.phase='lobby';if(saved.phase==='turn'){this.resetShoe();for(const p of this.players.values()){if(p.wager&&p.status==='Playing')p.bank+=p.wager;p.wager=0;p.cards=[];p.status='Interrupted'}}this.notice='Room restored from durable checkpoint. Interrupted hands were canceled; reconnect to start a new round.'}});
+  this.state.blockConcurrencyWhile(async()=>{const saved=await this.state.storage.get('roomCheckpoint');if(saved&&saved.v===1){this.shoe=saved.shoe||[];this.players=new Map((saved.seats||[]).map(p=>[p.id,{...p,socket:null}]));this.host=saved.host||null;this.round=saved.round||0;this.running=saved.running||0;this.settings=saved.settings||{decks:6};this.dealer=[];this.phase='lobby';if(saved.phase==='turn'||saved.phase==='insurance'){this.resetShoe();for(const p of this.players.values()){if(p.wager&&p.status==='Playing')p.bank+=p.wager;p.wager=0;p.cards=[];p.status='Interrupted'}}this.notice='Room restored from durable checkpoint. Interrupted hands were canceled; reconnect to start a new round.'}});
  }
  async checkpoint(){await this.state.storage.put('roomCheckpoint',{v:1,shoe:this.shoe,round:this.round,running:this.running,settings:this.settings,phase:this.phase,host:this.host,seats:[...this.players.values()].map(({socket,...p})=>p),savedAt:Date.now()})}
  async fetch(request){
@@ -44,7 +44,7 @@ export class BlackjackRoom {
     old.socket=connection.socket;connection.seated=old.id;this.send(connection,{type:'welcome',playerId:old.id,token:old.token,reconnected:true});this.broadcast();return;
    }
    if(m.type!=='join')throw Error('Join or resume first');
-   if(this.phase==='turn')throw Error('Wait until the current round finishes');
+   if(this.phase==='turn'||this.phase==='insurance')throw Error('Wait until the current round finishes');
    if(this.players.size>=4)throw Error('Room full');
    connection.seated=connection.id;this.players.set(connection.id,connection);if(!this.host)this.host=connection.id;
    this.send(connection,{type:'welcome',playerId:connection.id,token:connection.token,reconnected:false});this.broadcast();return;
@@ -62,7 +62,7 @@ export class BlackjackRoom {
   this.checkpoint().catch(()=>{});
  }
  send(p,data){try{p.socket?.send(JSON.stringify(data))}catch{}}
- publicState(viewer){const list=[...this.players.values()];return {type:'state',phase:this.phase,round:this.round,hostId:this.host,turnId:this.current()?.id||null,playerId:viewer.id,shoeRemaining:this.shoe.length,visibleRunningCount:this.running,players:list.map(p=>({id:p.id,name:p.name,cards:p.cards,hands:p.hands||null,activeHand:p.activeHand||0,insurance:p.insurance||0,bank:p.bank,status:p.status,wager:p.wager})),dealer:this.dealer.map((c,i)=>this.phase==='turn'&&i===1?{hidden:true}:c),message:this.notice||'Waiting for players'} }
+ publicState(viewer){const list=[...this.players.values()];return {type:'state',phase:this.phase,round:this.round,hostId:this.host,turnId:this.current()?.id||null,playerId:viewer.id,shoeRemaining:this.shoe.length,visibleRunningCount:this.running,players:list.map(p=>({id:p.id,name:p.name,cards:p.cards,hands:p.hands||null,activeHand:p.activeHand||0,insurance:p.insurance||0,bank:p.bank,status:p.status,wager:p.wager})),dealer:this.dealer.map((c,i)=>(this.phase==='turn'||this.phase==='insurance')&&i===1?{hidden:true}:c),message:this.notice||'Waiting for players'} }
  broadcast(){for(const p of this.players.values())this.send(p,this.publicState(p))}
  current(){return [...this.players.values()][this.turn]}
  draw(hidden=false){if(!this.shoe.length)throw Error('Shoe depleted');const c=this.shoe.pop();if(!hidden)this.running+=count(c);return c}
@@ -114,7 +114,7 @@ export class BlackjackRoom {
  advance(){this.turn++;this.skip();this.broadcast()}
  finish(){
   this.phase='complete';if(this.dealer[1]&&!this.revealed){this.running+=count(this.dealer[1]);this.revealed=true}
-  const eligible=[...this.players.values()].some(p=>p.wager&&(p.hands?p.hands.some(h=>h.status!=='Surrender'&&score(h.cards)<=21):p.status!=='Surrender'&&score(p.cards)<=21));
+  const eligible=!handValue(this.dealer).blackjack&&[...this.players.values()].some(p=>p.wager&&(p.hands?p.hands.some(h=>h.status!=='Surrender'&&score(h.cards)<=21):p.status!=='Surrender'&&score(p.cards)<=21));
   while(eligible&&dealerShouldHit(this.dealer)&&this.shoe.length)this.dealer.push(this.draw());
   for(const p of this.players.values()){
     if(!p.wager)continue;
