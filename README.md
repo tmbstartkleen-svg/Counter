@@ -1,27 +1,32 @@
 # BlackEdge Elite — Counter
 
-BlackEdge Elite is a play-money blackjack simulator and card-counting education project.
+BlackEdge Elite is an educational **play-money** blackjack and card-counting training platform.
 
-## Repository version (V13 Lite)
+## V14 Lite (GitHub edition)
 
-`index.html` is a browser-playable version featuring:
-- Finite shuffled card shoe with 1, 2, 6 or 8 decks
-- Three simulated tablemates, dealer hole card and natural-blackjack payout
-- Hit, stand and double using virtual credits
-- Visible Hi-Lo running / true count with hide-count practice
-- Timed counting drills, true-count conversion questions, progress tiers and JSON export
-- Responsive casino-styled interface
+Open `index.html` in a modern browser or use `python3 -m http.server 8000`.
 
-**Important:** This GitHub version is a streamlined V13 edition. The complete downloadable V12 package created in the ChatGPT session has additional features inherited from V11 (including split/surrender and decision journaling) that have **not** yet been merged here. Full rule-specific strategy validation and browser regression testing are pending.
+### Available
 
-V13 Lite also adds discard-tray estimation and true-count calculation exercises in `v13-academy.js`. The fully featured V13 source package is provided separately as a downloadable artifact; its complete casino rule set is not yet merged into GitHub.
+- Casino practice with finite shuffled shoe and three simulated tablemates.
+- Hi-Lo running and true-count practice, hidden count, timed drills and academy levels.
+- V13 discard-tray estimation and true-count exercises.
+- **V14 Shared-table Practice Room:** 1–4 human participants on **one shared device**, pass-and-play seating, one shoe, face-down dealer hole card, hit/stand/double, virtual bankrolls, per-round results and count visibility toggle. No real-money betting.
 
-## Open locally
+### Not yet available
 
-Download the repo and open `index.html` in a modern browser. Alternatively, serve it using `python3 -m http.server 8000`.
+- **Internet multiplayer is NOT implemented.** V14 is local pass-and-play only. Online room creation, authentication, server-authoritative shuffling, WebSocket sync, disconnect/rejoin, reconnection and security testing are still needed.
+- The comprehensive standalone V13 casino features have not all been merged into GitHub. This repository's casino remains Lite (e.g., split and surrender are still missing here).
+- Browser end-to-end regression testing, exhaustive rules testing, and Cloudflare deployment.
 
-To publish via GitHub Pages, enable Pages using **Deploy from a branch → main → /(root)** in repository Settings.
+### Notes on casino rules
+
+The V14 room is a training prototype: fixed 25-chip virtual wagers, dealer stands on all 17s, standard blackjack pays 3:2, no insurance or splitting, no surrender. Blackjack payouts assume natural hands only, and simultaneous naturals push. Chips have no monetary value.
+
+## Deployment
+
+For simple static preview, enable GitHub Pages from **Settings → Pages → Deploy from a branch → main / (root)**. Online multiplayer requires a suitable backend, such as Cloudflare Workers with Durable Objects, and explicit integration tests.
 
 ## Safety
 
-Educational play-money simulator only. No real wagering, prediction guarantee or casino integration.
+Educational simulation only. Card counting is not a guarantee of winning and may be restricted by individual casinos.
