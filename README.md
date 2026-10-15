@@ -2,7 +2,7 @@
 
 BlackEdge Elite is an **educational play-money** blackjack training app.
 
-## V16 reliability checkpoint (committed)
+## V17 persistence checkpoint (committed)
 
 ### Casino and counting academy
 - `index.html` includes the browser casino game, Hi-Lo practice and timed drills.
@@ -30,9 +30,14 @@ The online service is **not deployed** or browser-regression-tested. A plain Git
 - Guard the dealer hole-card counting update so it occurs once per round.
 - Update the health endpoint version to V16.
 
+### V17 checkpoint changes
+- Persist shuffled shoe and round number with Durable Object storage after WebSocket actions.
+- Restore saved shoe/count after cold start for completed rounds; detect interrupted rounds and reshuffle.
+- This is **checkpointing**, not full reconnect-safe persistence; seats and balances remain ephemeral.
+
 ### Known limitations and required hardening
 
-- V16 still uses **in-memory** room state and should not be trusted to survive Durable Object restarts. Add persistent storage and WebSocket hibernation handling before production.
+- V17 writes a durable **shoe/round checkpoint** to Durable Object storage. On a restart during a hand, it cancels the unfinished hand and reshuffles instead of resuming unsettled wagers. **Player identities, bankrolls, live sockets, and secure rejoining are not persisted**; full state durability and WebSocket hibernation are still required before production.
 - No verified user identities, anti-abuse controls, room access passwords, secure reconnection or invite expiry.
 - Mid-round admission is blocked, but full seat identity/rejoin persistence is not yet available.
 - No complete configurable blackjack rule matrix. Online practice currently uses hit, stand, double, 3:2 natural blackjack and dealer stand-on-17.
@@ -42,4 +47,4 @@ The online service is **not deployed** or browser-regression-tested. A plain Git
 
 ## Source status
 
-The GitHub repo is the V16 **development edition on main**, not a production-certified release. V16 GitHub commits were verified, but Cloudflare deployment has not occurred.
+The GitHub repo is the V17 **development edition on main**, not a production-certified release. V17 GitHub commits were verified, but Cloudflare deployment has not occurred.
