@@ -1,10 +1,10 @@
-import {dealerShouldHit,settleHand} from './blackjack-rules.js';
+import {dealerShouldHit,settleHand,settleInsurance,canSurrender,canSplit} from './blackjack-rules.js';
 // Cloudflare Durable Object: server-authoritative virtual blackjack room.
 // Educational play money only. No payments, prizes, or persistent player identities.
 export default {
  async fetch(request,env){
   const url=new URL(request.url);
-  if(url.pathname==='/api/health')return json({ok:true,service:'blackedge-rooms-v21'});
+  if(url.pathname==='/api/health')return json({ok:true,service:'blackedge-rooms-v22'});
   const match=url.pathname.match(/^\/api\/rooms\/([a-zA-Z0-9_-]{4,40})\/ws$/);
   if(!match)return new Response('Not found',{status:404});
   if(request.headers.get('Upgrade')?.toLowerCase()!=='websocket')return new Response('WebSocket upgrade required',{status:426});
@@ -57,12 +57,12 @@ export class BlackjackRoom {
   this.sessions.delete(connection.id);const p=this.players.get(connection.seated);
   if(!p||p.socket!==connection.socket)return;
   p.socket=null;
-  if(this.phase==='turn'&&this.current()?.id===p.id){p.status='Disconnected - standing';this.advance()}
+  if(this.phase==='turn'&&this.current()?.id===p.id){p.status='Disconnected - standing';this.nextHand(p)}
   else this.broadcast();
   this.checkpoint().catch(()=>{});
  }
  send(p,data){try{p.socket?.send(JSON.stringify(data))}catch{}}
- publicState(viewer){const list=[...this.players.values()];return {type:'state',phase:this.phase,round:this.round,hostId:this.host,turnId:this.current()?.id||null,playerId:viewer.id,shoeRemaining:this.shoe.length,visibleRunningCount:this.running,players:list.map(p=>({id:p.id,name:p.name,cards:p.cards,bank:p.bank,status:p.status,wager:p.wager})),dealer:this.dealer.map((c,i)=>this.phase==='turn'&&i===1?{hidden:true}:c),message:this.notice||'Waiting for players'} }
+ publicState(viewer){const list=[...this.players.values()];return {type:'state',phase:this.phase,round:this.round,hostId:this.host,turnId:this.current()?.id||null,playerId:viewer.id,shoeRemaining:this.shoe.length,visibleRunningCount:this.running,players:list.map(p=>({id:p.id,name:p.name,cards:p.cards,hands:p.hands||null,activeHand:p.activeHand||0,insurance:p.insurance||0,bank:p.bank,status:p.status,wager:p.wager})),dealer:this.dealer.map((c,i)=>this.phase==='turn'&&i===1?{hidden:true}:c),message:this.notice||'Waiting for players'} }
  broadcast(){for(const p of this.players.values())this.send(p,this.publicState(p))}
  current(){return [...this.players.values()][this.turn]}
  draw(hidden=false){if(!this.shoe.length)throw Error('Shoe depleted');const c=this.shoe.pop();if(!hidden)this.running+=count(c);return c}
@@ -72,15 +72,29 @@ export class BlackjackRoom {
   if(m.type==='name'){if(this.phase!=='lobby'&&this.phase!=='complete')throw Error('Wait for the round');const name=String(m.name||'').trim().slice(0,24);if(!/^[a-zA-Z0-9 _-]{1,24}$/.test(name))throw Error('Name must use letters, numbers, spaces');p.name=name;this.broadcast();return}
   if(m.type==='start'){if(this.host!==p.id)throw Error('Only host can deal');if(this.phase==='turn')throw Error('Round underway');if(![...this.players.values()].some(v=>v.socket))throw Error('No connected players');this.startRound();return}
   if(this.phase!=='turn'||this.current()?.id!==p.id)throw Error('Not your turn');
-  if(m.type==='hit'){p.cards.push(this.draw());if(score(p.cards)>=21){p.status=score(p.cards)>21?'Bust':'Done';this.advance()}else this.broadcast();return}
-  if(m.type==='stand'){p.status='Stand';this.advance();return}
-  if(m.type==='double'){if(p.cards.length!==2||p.bank<p.wager)throw Error('Double unavailable');p.bank-=p.wager;p.wager*=2;p.cards.push(this.draw());p.status=score(p.cards)>21?'Bust':'Doubled';this.advance();return}
+  if(m.type==='hit'){p.cards.push(this.draw());if(score(p.cards)>=21){p.status=score(p.cards)>21?'Bust':'Done';this.nextHand(p)}else this.broadcast();return}
+  if(m.type==='stand'){p.status='Stand';this.nextHand(p);return}
+  if(m.type==='double'){if(p.cards.length!==2||p.bank<p.wager)throw Error('Double unavailable');p.bank-=p.wager;p.wager*=2;p.cards.push(this.draw());p.status=score(p.cards)>21?'Bust':'Doubled';this.nextHand(p);return}
+  if(m.type==='surrender'){if(p.hands||!canSurrender({cards:p.cards}))throw Error('Surrender unavailable');p.status='Surrender';this.nextHand(p);return}
+  if(m.type==='insurance'){if(this.dealer[0]?.r!=='A'||p.insurance||p.cards.length!==2||p.status!=='Playing')throw Error('Insurance unavailable');const amount=p.wager/2;if(p.bank<amount)throw Error('Insufficient chips');p.bank-=amount;p.insurance=amount;this.broadcast();return}
+  if(m.type==='split'){
+   if(p.hands||!canSplit(p.cards)||p.bank<p.wager)throw Error('Split unavailable');
+   p.bank-=p.wager;const [a,b]=p.cards;
+   p.hands=[{cards:[a,this.draw()],wager:p.wager,status:'Playing',splitHand:true},{cards:[b,this.draw()],wager:p.wager,status:'Playing',splitHand:true}];
+   p.activeHand=0;p.cards=p.hands[0].cards;p.status='Playing';this.broadcast();return
+  }
   throw Error('Unsupported action');
+ }
+ nextHand(p){
+  if(p.hands){const hand=p.hands[p.activeHand];hand.cards=p.cards;hand.wager=p.wager;hand.status=p.status;
+   if(p.activeHand+1<p.hands.length){p.activeHand++;const next=p.hands[p.activeHand];p.cards=next.cards;p.wager=next.wager;p.status='Playing';this.broadcast();return}
+  }
+  this.advance();
  }
  startRound(){
   if(this.shoe.length<70)this.resetShoe();
   this.phase='turn';this.turn=0;this.round++;this.dealer=[];this.revealed=false;this.notice='Player decisions';
-  for(const p of this.players.values()){p.cards=[];p.wager=p.socket?Math.min(25,p.bank):0;p.bank-=p.wager;p.status=p.wager?'Playing':p.socket?'Out of chips':'Offline'}
+  for(const p of this.players.values()){p.cards=[];p.hands=null;p.activeHand=0;p.insurance=0;p.wager=p.socket?Math.min(25,p.bank):0;p.bank-=p.wager;p.status=p.wager?'Playing':p.socket?'Out of chips':'Offline'}
   for(let i=0;i<2;i++){for(const p of this.players.values())if(p.status==='Playing')p.cards.push(this.draw());this.dealer.push(this.draw(i===1))}
   if(score(this.dealer)===21){this.finish();return}
   this.skip();this.broadcast();
@@ -89,13 +103,15 @@ export class BlackjackRoom {
  advance(){this.turn++;this.skip();this.broadcast()}
  finish(){
   this.phase='complete';if(this.dealer[1]&&!this.revealed){this.running+=count(this.dealer[1]);this.revealed=true}
-  const eligible=[...this.players.values()].some(p=>p.wager&&score(p.cards)<=21);
+  const eligible=[...this.players.values()].some(p=>p.wager&&(p.hands?p.hands.some(h=>h.status!=='Surrender'&&score(h.cards)<=21):p.status!=='Surrender'&&score(p.cards)<=21));
   while(eligible&&dealerShouldHit(this.dealer)&&this.shoe.length)this.dealer.push(this.draw());
   for(const p of this.players.values()){
     if(!p.wager)continue;
-    const outcome=settleHand({cards:p.cards,dealerCards:this.dealer,wager:p.wager});
-    p.bank+=outcome.payout;
-    p.status=outcome.result;
+    const hands=p.hands||[{cards:p.cards,wager:p.wager,status:p.status,splitHand:false}];
+    let results=[];
+    for(const h of hands){const outcome=settleHand({cards:h.cards,dealerCards:this.dealer,wager:h.wager,surrender:h.status==='Surrender',splitHand:!!h.splitHand});p.bank+=outcome.payout;h.status=outcome.result;results.push(outcome.result)}
+    if(p.insurance){p.bank+=settleInsurance({insuranceWager:p.insurance,dealerCards:this.dealer}).payout}
+    p.status=results.join(' / ');
   }
   this.notice='Round complete. Host may deal again';this.broadcast();
  }
