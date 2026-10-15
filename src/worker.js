@@ -4,7 +4,7 @@ import {dealerShouldHit,settleHand,settleInsurance,canSurrender,canSplit,handVal
 export default {
  async fetch(request,env){
   const url=new URL(request.url);
-  if(url.pathname==='/api/health')return json({ok:true,service:'blackedge-rooms-v27'});
+  if(url.pathname==='/api/health')return json({ok:true,service:'blackedge-rooms-v28'});
   const match=url.pathname.match(/^\/api\/rooms\/([a-zA-Z0-9_-]{4,40})\/ws$/);
   if(!match)return new Response('Not found',{status:404});
   if(request.headers.get('Upgrade')?.toLowerCase()!=='websocket')return new Response('WebSocket upgrade required',{status:426});
@@ -57,7 +57,13 @@ export class BlackjackRoom {
   this.sessions.delete(connection.id);const p=this.players.get(connection.seated);
   if(!p||p.socket!==connection.socket)return;
   p.socket=null;
-  if(this.phase==='turn'&&this.current()?.id===p.id){p.status='Disconnected - standing';this.nextHand(p)}
+  if(this.phase==='insurance'&&p.wager&&!this.insuranceDecided.has(p.id)){
+   this.insuranceDecided.add(p.id);
+   if([...this.players.values()].filter(v=>v.wager).every(v=>this.insuranceDecided.has(v.id))){
+    if(score(this.dealer)===21)this.finish();
+    else{this.phase='turn';this.turn=0;this.skip();this.broadcast()}
+   }else this.broadcast();
+  }else if(this.phase==='turn'&&this.current()?.id===p.id){p.status='Disconnected - standing';this.nextHand(p)}
   else this.broadcast();
   this.checkpoint().catch(()=>{});
  }
