@@ -20,9 +20,9 @@ function count(c){return ['2','3','4','5','6'].includes(c.r)?1:['10','J','Q','K'
 export class BlackjackRoom {
  constructor(state,env){
   this.state=state;this.players=new Map();this.shoe=[];this.dealer=[];this.running=0;this.round=0;this.turn=0;this.phase='lobby';this.settings={decks:6};this.host=null;this.revealed=false;
-  this.state.blockConcurrencyWhile(async()=>{const saved=await this.state.storage.get('roomCheckpoint');if(saved&&saved.v===1){this.shoe=saved.shoe||[];this.round=saved.round||0;this.running=saved.running||0;this.settings=saved.settings||{decks:6};this.dealer=[];this.phase='lobby';this.notice='Room restored from durable checkpoint. Interrupted hands were canceled; reconnect to start a new round.'}});
+  this.state.blockConcurrencyWhile(async()=>{const saved=await this.state.storage.get('roomCheckpoint');if(saved&&saved.v===1){this.shoe=saved.shoe||[];this.round=saved.round||0;this.running=saved.running||0;this.settings=saved.settings||{decks:6};this.dealer=[];this.phase='lobby';if(saved.phase==='turn'){this.resetShoe()}this.notice='Room restored from durable checkpoint. Interrupted hands were canceled; reconnect to start a new round.'}});
  }
- async checkpoint(){await this.state.storage.put('roomCheckpoint',{v:1,shoe:this.shoe,round:this.round,running:this.running,settings:this.settings,savedAt:Date.now()})}
+ async checkpoint(){await this.state.storage.put('roomCheckpoint',{v:1,shoe:this.shoe,round:this.round,running:this.running,settings:this.settings,phase:this.phase,savedAt:Date.now()})}
  async fetch(request){
   const pair=new WebSocketPair(),client=pair[0],server=pair[1];server.accept();
   const id=crypto.randomUUID(),p={id,name:'Guest',cards:[],bank:1000,wager:25,status:'Waiting',socket:server};
