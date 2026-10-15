@@ -31,3 +31,11 @@ npm run dev
 ```
 
 The remaining tasks are release blockers, not optional stretch features. Development iterations may extend beyond V28. All credits are fictional; no real-money bets or prizes.
+
+## Post-V28 release hardening
+
+- Serialized incoming multiplayer WebSocket commands to reduce overlapping checkpoint writes.
+- Added a voluntary Leave Room action between rounds. It frees the reserved player seat, invalidates that seat's recovery token, and transfers host responsibility when needed.
+- Added three seat cleanup regression tests.
+
+**Verification caveat:** GitHub commits are confirmed, but passing GitHub Actions tests, browser/device QA, Cloudflare staging deployment, and crash-safe Durable Object behavior are not yet verified. This is still a development build, not a certified live beta.
