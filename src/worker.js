@@ -21,7 +21,7 @@ function count(c){return ['2','3','4','5','6'].includes(c.r)?1:['10','J','Q','K'
 export class BlackjackRoom {
  constructor(state,env){
   this.state=state;this.players=new Map();this.shoe=[];this.dealer=[];this.running=0;this.round=0;this.turn=0;this.phase='lobby';this.settings={decks:6};this.host=null;this.revealed=false;this.sessions=new Map();this.insuranceDecided=new Set();this.messageQueue=Promise.resolve();
-  this.state.blockConcurrencyWhile(async()=>{const saved=await this.state.storage.get('roomCheckpoint');if(saved&&saved.v===1){this.shoe=saved.shoe||[];this.players=new Map((saved.seats||[]).map(p=>[p.id,{...p,socket:null}]));this.host=saved.host||null;this.round=saved.round||0;this.running=saved.running||0;this.settings=saved.settings||{decks:6};this.dealer=[];this.phase='lobby';if(saved.phase==='turn'||saved.phase==='insurance'){this.resetShoe();for(const p of this.players.values()){if(p.wager&&p.status==='Playing')p.bank+=p.wager;p.wager=0;p.cards=[];p.status='Interrupted'}}this.notice='Room restored from durable checkpoint. Interrupted hands were canceled; reconnect to start a new round.'}});
+  this.state.blockConcurrencyWhile(async()=>{const saved=await this.state.storage.get('roomCheckpoint');if(saved&&saved.v===1){this.shoe=saved.shoe||[];this.players=new Map((saved.seats||[]).map(p=>[p.id,{...p,socket:null}]));this.host=saved.host||null;this.round=saved.round||0;this.running=saved.running||0;this.settings=saved.settings||{decks:6};this.dealer=[];this.phase='lobby';if(saved.phase==='turn'||saved.phase==='insurance'){this.resetShoe();for(const p of this.players.values()){if(p.wager){p.bank+=p.hands?p.hands.reduce((sum,h)=>sum+(h.wager||0),0):p.wager;if(p.insurance)p.bank+=p.insurance}p.insurance=0;p.hands=null;p.wager=0;p.cards=[];p.status='Interrupted'}}this.notice='Room restored from durable checkpoint. Interrupted hands were canceled; reconnect to start a new round.'}});
  }
  async checkpoint(){await this.state.storage.put('roomCheckpoint',{v:1,shoe:this.shoe,round:this.round,running:this.running,settings:this.settings,phase:this.phase,host:this.host,seats:[...this.players.values()].map(({socket,...p})=>p),savedAt:Date.now()})}
  async fetch(request){
@@ -30,7 +30,7 @@ export class BlackjackRoom {
   // Allow a transient connection to reclaim an existing seat before allocating a new seat.
   this.sessions.set(id,p);
   server.addEventListener('message',event=>{const op=async()=>{try{if(typeof event.data!=='string'||event.data.length>4096)throw Error('Invalid message');const m=JSON.parse(event.data);await this.handle(p,m);await this.checkpoint()}catch(e){this.send(p,{type:'error',message:String(e.message||e)})}};this.messageQueue=this.messageQueue.then(op,op)});
-  server.addEventListener('close',()=>this.leave(p));server.addEventListener('error',()=>this.leave(p));
+  server.addEventListener('close',()=>{this.messageQueue=this.messageQueue.then(()=>this.leave(p))});server.addEventListener('error',()=>{this.messageQueue=this.messageQueue.then(()=>this.leave(p))});
   this.send(p,{type:'hello',message:'Send resume with token or join as a new player'});
   return new Response(null,{status:101,webSocket:client});
  }
