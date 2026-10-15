@@ -79,7 +79,7 @@ export class BlackjackRoom {
  startRound(){
   if(this.shoe.length<70)this.resetShoe();
   this.phase='turn';this.turn=0;this.round++;this.dealer=[];this.revealed=false;this.notice='Player decisions';
-  for(const p of this.players.values()){p.cards=[];p.wager=Math.min(25,p.bank);p.bank-=p.wager;p.status=p.wager&&p.socket?'Playing':p.wager?'Offline':'Out of chips'}
+  for(const p of this.players.values()){p.cards=[];p.wager=p.socket?Math.min(25,p.bank):0;p.bank-=p.wager;p.status=p.wager?'Playing':p.socket?'Out of chips':'Offline'}
   for(let i=0;i<2;i++){for(const p of this.players.values())if(p.status==='Playing')p.cards.push(this.draw());this.dealer.push(this.draw(i===1))}
   if(score(this.dealer)===21){this.finish();return}
   this.skip();this.broadcast();
