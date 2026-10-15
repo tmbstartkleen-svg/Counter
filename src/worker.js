@@ -69,8 +69,12 @@ export class BlackjackRoom {
     if(score(this.dealer)===21)this.finish();
     else{this.phase='turn';this.turn=0;this.skip();this.broadcast()}
    }else this.broadcast();
-  }else if(this.phase==='turn'&&this.current()?.id===p.id){p.status='Disconnected - standing';this.nextHand(p)}
-  else this.broadcast();
+  }else if(this.phase==='turn'&&p.wager){
+   const wasCurrent=this.current()?.id===p.id;
+   if(p.hands){for(const h of p.hands)if(h.status==='Playing')h.status='Stand';p.activeHand=p.hands.length-1}
+   p.status='Disconnected - standing';
+   if(wasCurrent)this.advance();else this.broadcast();
+  }else this.broadcast();
   this.checkpoint().catch(()=>{});
  }
  send(p,data){try{p.socket?.send(JSON.stringify(data))}catch{}}
