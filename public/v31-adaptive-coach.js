@@ -24,7 +24,7 @@ function assess(){
  $('coachPace').textContent=(pace/1000).toFixed(2)+' sec';
  $('coachRecommendation').textContent=message;
  $('coachSample').textContent='Based on '+valid.length+' recent speed drills and '+checkpoints+' checkpoints from your latest completed full shoe. More drills improve the assessment.';
- $('coachGo').onclick=()=>{document.getElementById(target)?.scrollIntoView({behavior:'smooth',block:'start'})};
+ $('coachGo').onclick=()=>{window.blackedgeAcademyOpen?.(target==='shoeAcademy'?'shoe':'speed')};
  return {speedAccuracy:speedPct,runningAccuracy:rPct,trueCountAccuracy:tPct,speedSample:valid.length,shoeCheckpoints:checkpoints,recommendation:message};
 }
 $('coachRefresh').onclick=assess;
