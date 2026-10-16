@@ -87,7 +87,7 @@ export class BlackjackRoom {
  action(p,m){
   if(!m||typeof m.type!=='string')throw Error('Action missing');
   if(m.type==='name'){if(this.phase!=='lobby'&&this.phase!=='complete')throw Error('Wait for the round');const name=String(m.name||'').trim().slice(0,24);if(!/^[a-zA-Z0-9 _-]{1,24}$/.test(name))throw Error('Name must use letters, numbers, spaces');p.name=name;this.broadcast();return}
-  if(m.type==='start'){if(this.host!==p.id)throw Error('Only host can deal');if(this.phase==='turn'||this.phase==='insurance')throw Error('Round underway');if(![...this.players.values()].some(v=>v.socket))throw Error('No connected players');this.startRound();return}
+  if(m.type==='start'){if(this.host!==p.id)throw Error('Only host can deal');if(this.phase==='turn'||this.phase==='insurance')throw Error('Round underway');if(![...this.players.values()].some(v=>v.socket&&v.bank>0))throw Error('No connected players with chips');this.startRound();return}
   if(this.phase==='insurance'){
    if(!['insurance','declineInsurance'].includes(m.type)||!p.wager||this.insuranceDecided.has(p.id))throw Error('Insurance decision unavailable');
    if(m.type==='insurance'){const amount=p.wager/2;if(p.bank<amount)throw Error('Insufficient chips');p.bank-=amount;p.insurance=amount}
