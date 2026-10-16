@@ -24,6 +24,8 @@ jobs:
           node --check v14-practice-room.js
           node --check v25-guided.js
           node --check v26-progress.js
+          node --check v29-speed-academy.js
+          node --check public/v29-speed-academy.js
       - name: Run blackjack and multiplayer regression tests
         run: |
           mkdir -p test-results
