@@ -11,3 +11,14 @@ test('insurance disconnect cannot leave an unresponsive player turn',()=>{
  r.action(b,{type:'declineInsurance'});
  assert.equal(r.phase,'turn');assert.equal(r.current()?.id,'b');
 });
+
+test('disconnect after insurance decision does not create an offline turn',()=>{
+ const r=room(),a=seat('a'),b=seat('b');a.seated='a';b.seated='b';
+ r.players.set('a',a);r.players.set('b',b);r.phase='insurance';r.dealer=[{r:'A',s:'S'},{r:'6',s:'C'}];
+ r.action(a,{type:'declineInsurance'});
+ assert.equal(r.phase,'insurance');
+ r.leave(a);
+ assert.equal(a.status,'Disconnected - standing');
+ r.action(b,{type:'declineInsurance'});
+ assert.equal(r.current()?.id,'b');
+});
