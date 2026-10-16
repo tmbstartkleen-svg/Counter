@@ -25,7 +25,18 @@ jobs:
           node --check v25-guided.js
           node --check v26-progress.js
       - name: Run blackjack and multiplayer regression tests
-        run: node --test --test-reporter=tap tests/*.test.js
+        run: |
+          mkdir -p test-results
+          set -o pipefail
+          node --test --test-reporter=tap tests/*.test.js 2>&1 | tee test-results/blackedge-tests.tap
+      - name: Preserve test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: blackedge-release-test-results
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Report verification environment
         if: always()
         run: |
