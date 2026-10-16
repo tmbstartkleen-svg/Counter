@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BlackjackRoom} from '../src/worker.js';
 const make=()=>new BlackjackRoom({storage:{get:async()=>null,put:async()=>{}},blockConcurrencyWhile:fn=>fn()},{});
-const player=(id)=>({id,token:id,name:id,socket:{send(){}},bank:75,wager:25,insurance:0,cards:[{r:'9',s:'S'},{r:'7',s:'H'}],status:'Playing',hands:null});
+const player=(id)=>({id,seated:id,token:id,name:id,socket:{send(){}},bank:75,wager:25,insurance:0,cards:[{r:'9',s:'S'},{r:'7',s:'H'}],status:'Playing',hands:null});
 test('insurance proceeds if the last undecided player disconnects',()=>{
  const r=make(),a=player('a'),b=player('b');r.players.set(a.id,a);r.players.set(b.id,b);r.host='a';
  r.phase='insurance';r.dealer=[{r:'A',s:'H'},{r:'6',s:'S'}];r.insuranceDecided.add('a');
