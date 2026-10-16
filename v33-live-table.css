@@ -1,0 +1,28 @@
+#liveStage{background:#0b241a;color:#f7e5c5;border:2px solid #a7824f;border-radius:24px;padding:15px;margin:15px 0;text-align:center}
+#liveStage .stage-felt{background:radial-gradient(ellipse at 50% 20%,#277c55,#0b432d 75%);border:10px solid #6f4b2b;border-radius:45% 45% 22% 22% / 28% 28% 20% 20%;min-height:430px;display:flex;flex-direction:column;justify-content:space-between;padding:18px 9px;box-shadow:inset 0 0 0 3px #b5925a,0 15px 26px #0005}
+#liveStage .stage-dealer{display:grid;justify-items:center;gap:5px}
+#liveStage .stage-seats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+#liveStage .stage-seat{min-width:0;border:1px solid #80977a;background:#07281fdd;padding:8px 2px;border-radius:16px;display:grid;justify-items:center;gap:5px}
+#liveStage .stage-seat.active{border:2px solid #f5c475;box-shadow:0 0 16px #f5c47577}
+#liveStage .stage-seat.offline{opacity:.55}
+#liveStage .stage-name{font-size:12px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#liveStage .stage-person{width:65px;height:74px;position:relative}
+#liveStage .stage-head{position:absolute;top:3px;left:16px;width:33px;height:40px;border-radius:48%;background:linear-gradient(120deg,#e1af88,#a16c54);border-top:10px solid #271c1c;z-index:2}
+#liveStage .stage-body{position:absolute;bottom:0;left:4px;width:57px;height:34px;background:linear-gradient(110deg,#283744,#121a21);border-radius:25px 25px 5px 5px}
+#liveStage .stage-dealer .stage-body{background:linear-gradient(90deg,#1c2529 43%,#f2e9d4 47% 53%,#1c2529 57%)}
+#liveStage .stage-hand{display:flex;justify-content:center;gap:2px;min-height:40px;flex-wrap:wrap}
+#liveStage .stage-card{display:grid;place-items:center;min-width:27px;height:40px;padding:0 2px;border-radius:5px;background:#fff9eb;color:#203a26;font-size:12px;font-weight:800;box-shadow:1px 3px 5px #0006}
+#liveStage .stage-card.red{color:#bb3030}
+#liveStage .stage-card.down{background:repeating-linear-gradient(45deg,#21465a 0 5px,#e0bf7e 5px 7px);color:transparent}
+#liveStage .stage-chip{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#a84e59 0 48%,#eedbba 50% 55%,#a84e59 57% 72%,#eedbba 73% 76%,#793741 78%);box-shadow:0 4px 0 #4e292f,0 7px 7px #0007;font-size:9px;font-weight:900}
+#liveStage .stage-info{font-size:10px;color:#e4c994}
+#liveStage .stage-brand{color:#f3dca49c;font-size:clamp(15px,2.5vw,25px);font-weight:900;letter-spacing:.13em;margin:12px 0}
+#liveStage .stage-banner{color:#ead1a4;font-size:12px;margin-top:12px}
+#liveStage.motion .stage-card.new{animation:stage-deal .4s ease-out both}
+#liveStage.motion .stage-seat.active .stage-person{animation:stage-idle 1.6s ease-in-out infinite}
+#liveStage.motion .stage-chip.new{animation:stage-chip .45s ease-out}
+@keyframes stage-deal{from{opacity:0;transform:translateY(-70px) rotate(-12deg)}to{opacity:1;transform:none}}
+@keyframes stage-idle{50%{transform:translateY(-3px)}}
+@keyframes stage-chip{from{opacity:0;transform:translateY(20px) scale(.65)}to{opacity:1;transform:none}}
+@media(max-width:600px){#liveStage{padding:6px}#liveStage .stage-felt{min-height:390px;border-width:6px;padding:8px 3px}#liveStage .stage-seat{padding:4px 1px}#liveStage .stage-card{min-width:19px;height:30px;font-size:9px}#liveStage .stage-person{transform:scale(.8);margin:-8px 0}#liveStage .stage-chip{width:25px;height:25px;font-size:8px}#liveStage .stage-info{font-size:8px}}
+@media(prefers-reduced-motion:reduce){#liveStage *{animation:none!important}}
