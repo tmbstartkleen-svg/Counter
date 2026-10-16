@@ -64,6 +64,7 @@ export class BlackjackRoom {
   p.socket=null;
   if(this.host===p.id&&(this.phase==='lobby'||this.phase==='complete')){const replacement=[...this.players.values()].find(v=>v.id!==p.id&&v.socket);if(replacement)this.host=replacement.id}
   if(this.phase==='insurance'&&p.wager&&!this.insuranceDecided.has(p.id)){
+   p.status='Disconnected - standing';
    this.insuranceDecided.add(p.id);
    if([...this.players.values()].filter(v=>v.wager).every(v=>this.insuranceDecided.has(v.id))){
     if(score(this.dealer)===21)this.finish();
