@@ -41,7 +41,7 @@ export class BlackjackRoom {
     const old=[...this.players.values()].find(p=>p.token===m.token);
     if(!old)throw Error('Seat token invalid or expired');
     if(old.socket&&old.socket!==connection.socket){try{old.socket.close(1000,'Seat reclaimed')}catch{}}
-    old.socket=connection.socket;connection.seated=old.id;this.send(connection,{type:'welcome',playerId:old.id,token:old.token,reconnected:true});this.broadcast();return;
+    old.socket=connection.socket;connection.seated=old.id;if(!this.players.get(this.host)?.socket&&(this.phase==='lobby'||this.phase==='complete'))this.host=old.id;this.send(connection,{type:'welcome',playerId:old.id,token:old.token,reconnected:true});this.broadcast();return;
    }
    if(m.type!=='join')throw Error('Join or resume first');
    if(this.phase==='turn'||this.phase==='insurance')throw Error('Wait until the current round finishes');
