@@ -141,6 +141,7 @@ export class BlackjackRoom {
     if(p.insurance){p.bank+=settleInsurance({insuranceWager:p.insurance,dealerCards:this.dealer}).payout}
     p.status=results.join(' / ');
   }
+  if(!this.players.get(this.host)?.socket)this.host=[...this.players.values()].find(p=>p.socket)?.id||null;
   this.notice='Round complete. Host may deal again';this.broadcast();
  }
 }
