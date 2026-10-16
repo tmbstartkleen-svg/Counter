@@ -122,7 +122,7 @@ export class BlackjackRoom {
   this.phase='turn';this.turn=0;this.round++;this.dealer=[];this.revealed=false;this.insuranceDecided=new Set();this.notice='Player decisions';
   for(const p of this.players.values()){p.cards=[];p.hands=null;p.activeHand=0;p.insurance=0;p.wager=p.socket?Math.min(25,p.bank):0;p.bank-=p.wager;p.status=p.wager?'Playing':p.socket?'Out of chips':'Offline'}
   for(let i=0;i<2;i++){for(const p of this.players.values())if(p.status==='Playing')p.cards.push(this.draw());this.dealer.push(this.draw(i===1))}
-  if(this.dealer[0]?.r==='A'){this.phase='insurance';this.notice='Dealer shows Ace: take or decline insurance';this.broadcast();return}
+  if(this.dealer[0]?.r==='A'&&[...this.players.values()].some(p=>p.wager)){this.phase='insurance';this.notice='Dealer shows Ace: take or decline insurance';this.broadcast();return}
   if(score(this.dealer)===21){this.finish();return}
   this.skip();this.broadcast();
  }
