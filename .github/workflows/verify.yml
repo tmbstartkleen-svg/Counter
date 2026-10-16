@@ -30,6 +30,8 @@ jobs:
           node --check public/v30-shoe-academy.js
           node --check v31-adaptive-coach.js
           node --check public/v31-adaptive-coach.js
+          node --check v32-academy-layout.js
+          node --check public/v32-academy-layout.js
       - name: Run blackjack and multiplayer regression tests
         run: |
           mkdir -p test-results
