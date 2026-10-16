@@ -79,7 +79,7 @@ export class BlackjackRoom {
   this.checkpoint().catch(()=>{});
  }
  send(p,data){try{p.socket?.send(JSON.stringify(data))}catch{}}
- publicState(viewer){const list=[...this.players.values()];return {type:'state',phase:this.phase,round:this.round,hostId:this.host,turnId:this.current()?.id||null,playerId:viewer.seated||viewer.id,shoeRemaining:this.shoe.length,visibleRunningCount:this.running,players:list.map(p=>({id:p.id,name:p.name,cards:p.cards,hands:p.hands||null,activeHand:p.activeHand||0,insurance:p.insurance||0,insuranceDecided:this.insuranceDecided.has(p.id),bank:p.bank,status:p.status,wager:p.wager})),dealer:this.dealer.map((c,i)=>(this.phase==='turn'||this.phase==='insurance')&&i===1?{hidden:true}:c),message:this.notice||'Waiting for players'} }
+ publicState(viewer){const list=[...this.players.values()];return {type:'state',phase:this.phase,round:this.round,hostId:this.host,turnId:this.current()?.id||null,playerId:viewer.seated||viewer.id,shoeRemaining:this.shoe.length,visibleRunningCount:this.running,players:list.map(p=>({id:p.id,name:p.name,connected:!!p.socket,cards:p.cards,hands:p.hands||null,activeHand:p.activeHand||0,insurance:p.insurance||0,insuranceDecided:this.insuranceDecided.has(p.id),bank:p.bank,status:p.status,wager:p.wager})),dealer:this.dealer.map((c,i)=>(this.phase==='turn'||this.phase==='insurance')&&i===1?{hidden:true}:c),message:this.notice||'Waiting for players'} }
  broadcast(){for(const p of this.players.values())this.send(p,this.publicState(p))}
  current(){return [...this.players.values()][this.turn]}
  draw(hidden=false){if(!this.shoe.length)throw Error('Shoe depleted');const c=this.shoe.pop();if(!hidden)this.running+=count(c);return c}
