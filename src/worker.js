@@ -46,7 +46,7 @@ export class BlackjackRoom {
    if(m.type!=='join')throw Error('Join or resume first');
    if(this.phase==='turn'||this.phase==='insurance')throw Error('Wait until the current round finishes');
    if(this.players.size>=4)throw Error('Room full');
-   connection.seated=connection.id;this.players.set(connection.id,connection);if(!this.host)this.host=connection.id;
+   connection.seated=connection.id;this.players.set(connection.id,connection);if(!this.host||!this.players.get(this.host)?.socket)this.host=connection.id;
    this.send(connection,{type:'welcome',playerId:connection.id,token:connection.token,reconnected:false});this.broadcast();return;
   }
   const seat=this.players.get(connection.seated);
