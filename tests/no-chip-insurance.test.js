@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {BlackjackRoom} from '../src/worker.js';
+function room(){return new BlackjackRoom({storage:{get:async()=>null,put:async()=>{}},blockConcurrencyWhile:fn=>fn()},{})}
+test('no-chip table does not stall in insurance phase',()=>{const r=room();r.players.set('p',{id:'p',name:'p',socket:{send(){}},bank:0,wager:0,cards:[],status:'Waiting'});r.shoe=[{r:'K',s:'S'},{r:'A',s:'H'},{r:'7',s:'C'},{r:'2',s:'D'},...Array.from({length:70},()=>({r:'5',s:'H'}))];r.resetShoe=()=>{};r.startRound();assert.notEqual(r.phase,'insurance');assert.equal(r.phase,'complete')});
