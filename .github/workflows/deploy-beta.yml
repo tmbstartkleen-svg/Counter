@@ -50,5 +50,9 @@ jobs:
           node -e "const d=require('/tmp/blackedge-health.json');if(d.ok!==true)process.exit(1)"
           echo "BlackEdge beta: $BETA_URL" >> "$GITHUB_STEP_SUMMARY"
           echo "Health check: passed" >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify two-client multiplayer WebSocket room
+        env:
+          BETA_URL: ${{ steps.publish.outputs.beta_url }}
+        run: node scripts/staging-smoke.mjs "$BETA_URL"
       - name: Deployment follow-up
         run: echo "Perform multiplayer, mobile and tutorial browser testing before beta approval."
