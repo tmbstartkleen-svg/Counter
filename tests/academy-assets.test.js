@@ -14,3 +14,10 @@ test('academy panel and coach integration anchors exist',()=>{
  for(const id of ['speedAcademy','shoeAcademy','adaptiveCoach'])assert.ok(readFileSync('public/v'+({speedAcademy:29,shoeAcademy:30,adaptiveCoach:31}[id])+'-'+({speedAcademy:'speed-academy',shoeAcademy:'shoe-academy',adaptiveCoach:'adaptive-coach'}[id])+'.js','utf8').includes(id));
  assert.match(readFileSync('public/v32-academy-layout.js','utf8'),/blackedgeAcademyOpen/);
 });
+
+test('academy layout includes five distinct navigable training sections',()=>{
+ const layout=readFileSync('public/v32-academy-layout.js','utf8');
+ for(const name of ['Overview','Speed Drills','Full Shoe','Count & Skills','Certification'])assert.ok(layout.includes(name),'Missing academy section '+name);
+ assert.match(layout,/aria-selected/);
+ assert.match(layout,/ArrowRight/);
+});
