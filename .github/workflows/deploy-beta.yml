@@ -36,7 +36,7 @@ jobs:
         run: |
           set -o pipefail
           npx wrangler deploy --name blackedge-counter-beta 2>&1 | tee /tmp/blackedge-deploy.log
-          BETA_URL="$(grep -Eo 'https://[A-Za-z0-9.-]+\\.workers\\.dev' /tmp/blackedge-deploy.log | tail -n 1 || true)"
+          BETA_URL="$(grep -Eo 'https://[A-Za-z0-9.-]+[.]workers[.]dev' /tmp/blackedge-deploy.log | tail -n 1 || true)"
           if [ -z "$BETA_URL" ]; then
             echo "::error::No workers.dev URL detected. Check that the Cloudflare workers.dev subdomain is enabled."
             exit 1
