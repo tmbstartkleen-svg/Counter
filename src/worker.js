@@ -53,7 +53,7 @@ export class BlackjackRoom {
   if(!seat||seat.socket!==connection.socket)throw Error('Seat no longer active');
   if(m.type==='leaveRoom'){
    if(this.phase==='turn'||this.phase==='insurance')throw Error('Leave after the round');
-   this.players.delete(seat.id);if(this.host===seat.id)this.host=this.players.keys().next().value||null;
+   this.players.delete(seat.id);if(this.host===seat.id)this.host=[...this.players.values()].find(v=>v.socket)?.id||null;
    connection.seated=null;this.send(connection,{type:'left'});this.broadcast();return;
   }
   this.action(seat,m);
