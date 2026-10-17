@@ -26,3 +26,15 @@
 @keyframes stage-chip{from{opacity:0;transform:translateY(20px) scale(.65)}to{opacity:1;transform:none}}
 @media(max-width:600px){#liveStage{padding:6px}#liveStage .stage-felt{min-height:390px;border-width:6px;padding:8px 3px}#liveStage .stage-seat{padding:4px 1px}#liveStage .stage-card{min-width:19px;height:30px;font-size:9px}#liveStage .stage-person{transform:scale(.8);margin:-8px 0}#liveStage .stage-chip{width:25px;height:25px;font-size:8px}#liveStage .stage-info{font-size:8px}}
 @media(prefers-reduced-motion:reduce){#liveStage *{animation:none!important}}
+#liveStage .stage-stack{display:flex;flex-direction:column-reverse;align-items:center;min-height:30px;padding-top:3px}
+#liveStage .stage-chip{margin-top:-8px;border:2px dashed #f4dfbd}
+#liveStage .stage-chip.alt{background:radial-gradient(circle,#235d9a 0 48%,#f2e5c8 50% 55%,#347bb7 57% 72%,#f2e5c8 73% 76%,#204d7c 78%)}
+#liveStage .stage-seat.winner{border-color:#f4d27c;box-shadow:0 0 18px #f2ce7080}
+#liveStage .stage-seat.winner .stage-head{animation:stage-win .7s ease-in-out 2}
+#liveStage .stage-seat.loser .stage-head{animation:stage-loss .5s ease-in-out}
+#liveStage .stage-dealer .stage-body{transform-origin:50% 100%}
+#liveStage.motion .stage-dealer .stage-body{animation:stage-dealer-idle 3.5s ease-in-out infinite}
+#liveStage.motion .stage-hand.dealing .stage-card.new{animation:stage-deal .4s ease-out both}
+@keyframes stage-win{50%{transform:translateY(-5px) rotate(5deg)}}
+@keyframes stage-loss{50%{transform:rotate(-5deg) translateY(2px)}}
+@keyframes stage-dealer-idle{50%{transform:translateY(-2px)}}
