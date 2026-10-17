@@ -4,3 +4,5 @@ test('live table renders chip stacks and outcome reactions',()=>{const js=readFi
 test('chip stack animation uses actual wager and honors reduced motion',()=>{const js=readFileSync('public/v33-live-table.js','utf8'),css=readFileSync('public/v33-live-table.css','utf8');assert.match(js,/Math\.ceil\(\(p\.wager\|\|0\)\/25\)/);assert.match(js,/stage-chip/);assert.match(css,/prefers-reduced-motion/);});
 
 test('virtual-chip payout visuals depend on server bank delta',()=>{const js=readFileSync('public/v33-live-table.js','utf8'),css=readFileSync('public/v33-live-table.css','utf8');assert.match(js,/s\.phase==='complete'&&Number\.isFinite\(previousBank\)&&p\.bank>previousBank/);assert.match(js,/p\.bank-previousBank/);assert.match(js,/next\[p\.id\+'bank'\]=p\.bank/);assert.match(css,/stage-payout-rise/);assert.match(css,/\.stage-stack\.new \.stage-chip/);});
+
+test('payout indicator provides accessible description',()=>{assert.match(readFileSync('public/v33-live-table.js','utf8'),/setAttribute\('aria-label','Payout of '/)});
