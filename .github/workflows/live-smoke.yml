@@ -14,6 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Check public health and animated table assets
         shell: bash
         run: |
@@ -28,3 +31,5 @@ jobs:
           grep -q 'BlackEdgeVisual' table.js
           grep -q 'stage-felt' table.css
           echo "Public health and animated table assets passed." >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify two real WebSocket players share room state
+        run: node scripts/staging-smoke.mjs "https://counter.tmbstartkleen.workers.dev"
