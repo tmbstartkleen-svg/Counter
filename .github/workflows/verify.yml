@@ -34,6 +34,7 @@ jobs:
           node --check public/v32-academy-layout.js
           node --check v33-live-table.js
           node --check public/v33-live-table.js
+          node --check v33-live-table.css
       - name: Run blackjack and multiplayer regression tests
         run: |
           mkdir -p test-results
