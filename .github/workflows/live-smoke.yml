@@ -2,6 +2,8 @@ name: BlackEdge Live Website Smoke Test
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
   schedule:
     - cron: '17 14 * * *'
