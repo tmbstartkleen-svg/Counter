@@ -1,0 +1,26 @@
+name: BlackEdge Live Website Smoke Test
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 14 * * *'
+permissions:
+  contents: read
+jobs:
+  live-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check public health and animated table assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://counter.tmbstartkleen.workers.dev"
+          curl -fLsS --retry 3 --connect-timeout 15 "$BASE/api/health" -o health.json
+          node -e "const d=require('./health.json');if(d.ok!==true)process.exit(1)"
+          curl -fLsS --retry 3 --connect-timeout 15 "$BASE/online.html" -o online.html
+          curl -fLsS --retry 3 --connect-timeout 15 "$BASE/v33-live-table.js" -o table.js
+          curl -fLsS --retry 3 --connect-timeout 15 "$BASE/v33-live-table.css" -o table.css
+          grep -q 'v33-live-table.js' online.html
+          grep -q 'BlackEdgeVisual' table.js
+          grep -q 'stage-felt' table.css
+          echo "Public health and animated table assets passed." >> "$GITHUB_STEP_SUMMARY"
