@@ -42,7 +42,8 @@ try{
  while(state.phase==='insurance'&&Date.now()<until){
    const current=state.players.find(p=>p.id===state.turnId)||state.players.find(p=>p.wager&&!p.insuranceDecided);
    const client=current?.id===first.playerId?a:b;
-   const nextState=receive(b,x=>x.type==='state'&&x.round===state.round&&(x.phase!=='insurance'||x.players.every(p=>!p.wager||p.insuranceDecided)));
+   const decidedBefore=state.players.filter(p=>p.wager&&p.insuranceDecided).length;
+   const nextState=receive(b,x=>x.type==='state'&&x.round===state.round&&(x.phase!=='insurance'||x.players.filter(p=>p.wager&&p.insuranceDecided).length>decidedBefore));
    client.send(JSON.stringify({type:'declineInsurance'}));state=await nextState;
  }
  if(state.phase==='turn'){
