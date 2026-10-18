@@ -105,3 +105,12 @@
 #liveStage .stage-turn{margin-top:10px;display:inline-block;border:1px solid #b89252;border-radius:999px;padding:5px 15px;background:#184b34;color:#fce6b7;font-size:13px;font-weight:800;letter-spacing:.025em}
 #liveStage.motion .stage-seat.active .stage-total{color:#ffe17b}
 @media(max-width:600px){#liveStage .stage-total{font-size:9px;line-height:1.3}#liveStage .stage-turn{font-size:12px}}
+
+/* Split hands remain individually readable, with the currently actionable hand highlighted. */
+#liveStage .stage-split-hands{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;width:100%;min-width:0}
+#liveStage .stage-split-hand{display:grid;justify-items:center;align-content:start;gap:4px;padding:5px 2px;border:1px solid #8bad8b88;border-radius:8px;background:#061a14aa;min-width:0}
+#liveStage .stage-split-hand.current{border-color:#ffd476;background:#254e2f;box-shadow:0 0 0 1px #ffd47688,0 0 10px #ffd47655}
+#liveStage .stage-hand-label{color:#dfca99;font-size:10px}
+#liveStage .stage-split-hand.current .stage-hand-label{color:#ffe09b}
+#liveStage .stage-split-hand .stage-card{min-width:19px;height:32px;font-size:10px}
+@media(max-width:600px){#liveStage .stage-split-hands{gap:2px}#liveStage .stage-split-hand{padding:3px 1px;gap:2px}#liveStage .stage-hand-label{font-size:8px}#liveStage .stage-split-hand .stage-card{min-width:14px;height:26px;font-size:8px}}
