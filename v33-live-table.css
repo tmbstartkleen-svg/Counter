@@ -85,3 +85,17 @@
 #liveStage.motion .stage-seat.loser .stage-head{animation:stage-loss .5s ease-in-out}
 @keyframes stage-player-focus{50%{transform:rotate(7deg) translateY(-2px)}}
 @media(prefers-reduced-motion:reduce){#liveStage .stage-seat .stage-head{animation:none!important}}
+
+/* Expressive illustrated faces and short game-action gestures (no fake players). */
+#liveStage .stage-person .stage-eyes{position:absolute;left:5px;top:10px;width:22px;height:3px;border-radius:50%;border-top:3px dotted #39251d}
+#liveStage .stage-person .stage-mouth{position:absolute;left:12px;top:25px;width:10px;height:5px;border-bottom:2px solid #6a392f;border-radius:0 0 50% 50%}
+#liveStage .stage-person .stage-player-arm{position:absolute;right:-7px;top:5px;width:31px;height:11px;border-radius:9px;background:linear-gradient(90deg,#202b37 0 53%,#bb856a 55% 100%);transform:rotate(25deg);transform-origin:3px center;z-index:3}
+#liveStage .stage-seat.just-hit .stage-player-arm{transform:rotate(-19deg)}
+#liveStage .stage-seat.just-stood .stage-player-arm{transform:rotate(-65deg)}
+#liveStage.motion .stage-seat.just-hit .stage-player-arm{animation:stage-hit-gesture .8s ease-out both}
+#liveStage.motion .stage-seat.just-stood .stage-player-arm{animation:stage-stand-gesture .8s ease-out both}
+#liveStage .stage-seat.winner .stage-mouth{height:8px;border-bottom-width:3px}
+#liveStage .stage-seat.loser .stage-mouth{border-bottom:0;border-top:2px solid #6a392f;border-radius:50% 50% 0 0}
+@keyframes stage-hit-gesture{0%{transform:rotate(25deg)}45%{transform:rotate(-36deg) scaleX(1.2)}100%{transform:rotate(25deg)}}
+@keyframes stage-stand-gesture{0%{transform:rotate(25deg)}45%{transform:rotate(-70deg)}100%{transform:rotate(25deg)}}
+@media(prefers-reduced-motion:reduce){#liveStage .stage-player-arm{animation:none!important}}
