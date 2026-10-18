@@ -28,6 +28,9 @@ jobs:
       - name: Verify two real browsers play and settle a live multiplayer round
         timeout-minutes: 4
         run: node scripts/two-browser-live.mjs
+      - name: Verify live active-hand disconnection and seat recovery
+        timeout-minutes: 4
+        run: node scripts/active-hand-disconnect.mjs
       - name: Preserve screenshots
         if: always()
         uses: actions/upload-artifact@v4
