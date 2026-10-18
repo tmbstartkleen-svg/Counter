@@ -69,3 +69,19 @@
 @keyframes stage-dealer-reach{0%{transform:rotate(-34deg) scaleX(.8)}33%{transform:rotate(-12deg) scaleX(1.5)}62%{transform:rotate(-16deg) scaleX(1.4)}100%{transform:rotate(-34deg) scaleX(.8)}}
 @media(max-width:600px){#liveStage .stage-arm{width:42px}}
 @media(prefers-reduced-motion:reduce){#liveStage .stage-arm{animation:none!important}}
+
+/* Distinct, seat-stable illustrated avatars for real connected players. */
+#liveStage .stage-person.avatar-0 .stage-head{background:linear-gradient(125deg,#f4cbac,#b77a5c);border-top-color:#30211d}
+#liveStage .stage-person.avatar-0 .stage-body{background:linear-gradient(110deg,#334d75,#151e33)}
+#liveStage .stage-person.avatar-1 .stage-head{background:linear-gradient(125deg,#c98d62,#855039);border-top-color:#141414}
+#liveStage .stage-person.avatar-1 .stage-body{background:linear-gradient(110deg,#693c55,#352439)}
+#liveStage .stage-person.avatar-2 .stage-head{background:linear-gradient(125deg,#b37a55,#6f402e);border-top-color:#28222d}
+#liveStage .stage-person.avatar-2 .stage-body{background:linear-gradient(110deg,#39655a,#182d2c)}
+#liveStage .stage-person.avatar-3 .stage-head{background:linear-gradient(125deg,#e6b38b,#a36d55);border-top-color:#60452f}
+#liveStage .stage-person.avatar-3 .stage-body{background:linear-gradient(110deg,#695137,#342719)}
+#liveStage .stage-seat.self .stage-name{color:#ffe3a4}
+#liveStage.motion .stage-seat.active .stage-head{animation:stage-player-focus 1.8s ease-in-out infinite}
+#liveStage.motion .stage-seat.winner .stage-head{animation:stage-win .7s ease-in-out 2}
+#liveStage.motion .stage-seat.loser .stage-head{animation:stage-loss .5s ease-in-out}
+@keyframes stage-player-focus{50%{transform:rotate(7deg) translateY(-2px)}}
+@media(prefers-reduced-motion:reduce){#liveStage .stage-seat .stage-head{animation:none!important}}
