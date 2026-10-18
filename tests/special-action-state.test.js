@@ -12,7 +12,7 @@ function setup({cards=['8','8'],dealer=['10','7'],bank=975,wager=25,extra=[]}={}
  room.phase='turn';room.turn=0;room.round=1;room.host='one';room.running=0;room.revealed=false;
  room.insuranceDecided=new Set();room.notice='test';
  room.broadcast=()=>{};
- room.draw=()=>c(room.shoe.pop());
+ room.draw=()=>room.shoe.pop();
  return {room,player};
 }
 test('split action reserves second stake, creates two server hands, and selects hand one',()=>{
