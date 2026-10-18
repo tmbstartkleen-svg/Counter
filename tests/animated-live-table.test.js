@@ -12,3 +12,5 @@ test('shoe-to-seat card animations are seat staggered and motion-safe',()=>{cons
 test('shoe-to-seat effect stays decorative and uses real server cards',()=>{const js=readFileSync('public/v33-live-table.js','utf8');assert.match(js,/\(s\.dealer\|\|\[\]\)\.map/);assert.match(js,/cards\.map\(\(c,i\)=>card\(/);assert.match(js,/aria-hidden="true"/);});
 
 test('dealer arm gestures only on fresh multiplayer cards',()=>{const js=readFileSync('public/v33-live-table.js','utf8'),css=readFileSync('public/v33-live-table.css','utf8');assert.match(js,/stage-arm/);assert.match(js,/hasNewCards=/);assert.match(js,/dealing-cards/);assert.match(css,/stage-dealer-reach/);assert.match(css,/prefers-reduced-motion/);});
+
+test('four seat-stable human avatar designs and active turn motion',()=>{const js=readFileSync('public/v33-live-table.js','utf8'),css=readFileSync('public/v33-live-table.css','utf8');assert.match(js,/avatar-'\+\(seat%4\)/);assert.match(js,/person\(i\)/);for(let i=0;i<4;i++)assert.match(css,new RegExp('avatar-'+i));assert.match(css,/stage-player-focus/);assert.match(css,/prefers-reduced-motion/)});
