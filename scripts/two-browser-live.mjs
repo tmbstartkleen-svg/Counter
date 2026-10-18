@@ -60,9 +60,46 @@ try {
     assert.equal(await page.locator('#stageDealer .stage-card.down').count(),0,'dealer hole card revealed');
     assert.ok(await page.locator('#stageDealerScore').innerText(),'dealer score visible');
   }
+  // Reload the mobile guest's page: sessionStorage should retain its resume token.
+  const before=await pages[1].evaluate(room=>({
+    token:sessionStorage.getItem('blackedge-seat-'+room),
+    bank:window.last?.players?.find(p=>p.id===window.last?.playerId)?.bank,
+    playerId:window.last?.playerId,
+    count:window.last?.players?.length
+  }),room);
+  assert.ok(before.token,'mobile guest has a stored resume token');
+  assert.equal(before.count,2,'both seats exist before reconnect');
+  // The inline game script keeps 'last' in top-level lexical scope, not on window.
+  const identity=await pages[1].evaluate(room=>({
+    token:sessionStorage.getItem('blackedge-seat-'+room),
+    id:last?.playerId,
+    bank:last?.players?.find(p=>p.id===last.playerId)?.bank
+  }),room);
+  await pages[1].reload({waitUntil:'load'});
+  await pages[1].locator('#join').click();
+  await pages[1].waitForFunction(()=>
+    document.querySelector('#stageStatus')?.textContent?.includes('2 of 4 people online') &&
+    typeof last!=='undefined' && !!last?.playerId
+  );
+  const resumed=await pages[1].evaluate(room=>({
+    token:sessionStorage.getItem('blackedge-seat-'+room),
+    id:last?.playerId,
+    bank:last?.players?.find(p=>p.id===last.playerId)?.bank,
+    seats:last?.players?.length,
+    round:last?.round
+  }),room);
+  assert.equal(resumed.id,identity.id,'guest reclaimed the same seat');
+  assert.equal(resumed.token,identity.token,'guest reused the existing resume token');
+  assert.equal(resumed.bank,identity.bank,'guest virtual chip balance was preserved');
+  assert.equal(resumed.seats,2,'reconnection did not create a duplicate player');
+  assert.equal(resumed.round,1,'room round remained after reconnect');
+  await pages[0].waitForFunction(()=>
+    document.querySelector('#stageStatus')?.textContent?.includes('2 of 4 people online')
+  );
+
   assert.deepEqual(errors,[], 'no browser JavaScript errors');
   await Promise.all(pages.map((page,i)=>page.screenshot({path:'test-results/browser/live-player-'+(i?'mobile':'desktop')+'.png',fullPage:true})));
-  console.log('PASS two isolated browsers joined one room, dealt and settled a full live blackjack round');
+  console.log('PASS two isolated browsers joined one room, settled a full round, and restored a guest seat after reload');
 }finally{
   for(const context of contexts)await context.close().catch(()=>{});
   await browser.close();
