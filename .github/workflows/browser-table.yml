@@ -37,6 +37,9 @@ jobs:
       - name: Verify live insurance wager and payout
         timeout-minutes: 4
         run: node scripts/live-insurance-browser.mjs
+      - name: Verify live split-hand actions and independent settlements
+        timeout-minutes: 4
+        run: node scripts/live-split-browser.mjs
       - name: Preserve screenshots
         if: always()
         uses: actions/upload-artifact@v4
