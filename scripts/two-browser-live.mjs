@@ -37,7 +37,7 @@ try {
   }
 
   // Resolve insurance if offered, and stand using the active player's real UI.
-  for(let step=0;step<8;step++){
+  for(let step=0;step<30;step++){
     const snapshot=await pages[0].evaluate(()=>({
       turn:document.querySelector('#stageTurn')?.textContent||'',
       meta:document.querySelector('#meta')?.textContent||'',
@@ -50,9 +50,9 @@ try {
       stand:await page.locator('#stand').isEnabled()
     })));
     const insuranceClient=controls.findIndex(x=>x.insurance);
-    if(insuranceClient>=0){await pages[insuranceClient].locator('#declineInsurance').click();continue}
+    if(insuranceClient>=0){await pages[insuranceClient].locator('#declineInsurance').evaluate(el=>el.click());await pages[0].waitForTimeout(250);continue}
     const turnClient=controls.findIndex(x=>x.stand);
-    if(turnClient>=0){await pages[turnClient].locator('#stand').click();continue}
+    if(turnClient>=0){await pages[turnClient].locator('#stand').evaluate(el=>el.click());await pages[0].waitForTimeout(250);continue}
     await pages[0].waitForTimeout(200);
   }
   for(const page of pages){
