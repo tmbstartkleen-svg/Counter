@@ -61,3 +61,11 @@
 #liveStage.motion .stage-dealer .stage-card.new{--deal-from-x:65px}
 @keyframes stage-card-flight{0%{opacity:0;transform:translate(var(--deal-from-x,0px),-115px) rotate(-30deg) scale(.62);filter:blur(2px)}70%{opacity:1;filter:blur(0)}100%{opacity:1;transform:translate(0,0) rotate(0) scale(1)}}
 @media(max-width:600px){#liveStage .stage-shoe{right:6%;top:14%;transform:scale(.75) rotate(15deg)}#liveStage .stage-seats .stage-seat:nth-child(1){--deal-from-x:80px}#liveStage .stage-seats .stage-seat:nth-child(2){--deal-from-x:45px}#liveStage .stage-seats .stage-seat:nth-child(3){--deal-from-x:0px}#liveStage .stage-seats .stage-seat:nth-child(4){--deal-from-x:-40px}}
+
+/* Dealer reaches toward the shoe when new cards arrive from authoritative room state. */
+#liveStage .stage-dealer .stage-person{isolation:isolate}
+#liveStage .stage-arm{position:absolute;left:47px;top:46px;width:50px;height:13px;border-radius:12px;background:linear-gradient(90deg,#1b2530 0 36%,#c18b66 38% 100%);transform:rotate(-34deg) scaleX(.8);transform-origin:5px 50%;z-index:3;pointer-events:none}
+#liveStage.motion.dealing-cards .stage-arm{animation:stage-dealer-reach .75s cubic-bezier(.25,.7,.25,1) both}
+@keyframes stage-dealer-reach{0%{transform:rotate(-34deg) scaleX(.8)}33%{transform:rotate(-12deg) scaleX(1.5)}62%{transform:rotate(-16deg) scaleX(1.4)}100%{transform:rotate(-34deg) scaleX(.8)}}
+@media(max-width:600px){#liveStage .stage-arm{width:42px}}
+@media(prefers-reduced-motion:reduce){#liveStage .stage-arm{animation:none!important}}
