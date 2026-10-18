@@ -59,8 +59,8 @@ try {
     complete.players[0].status = 'Win';
     complete.players[1].status = 'Loss';
     await page.evaluate(next => window.BlackEdgeVisual.render(next), complete);
+    assert.equal(await page.locator('.stage-payout').count(), 1, 'only winning seat has payout indicator');
     assert.equal(await page.locator('.stage-payout').innerText(), '+50 chips', 'server bank change displays exact payout');
-    assert.match(await page.locator('.stage-payout').innerText(), /\\+50 chips/);
     assert.equal(await page.locator('#stageDealerScore').innerText(), 'Total 17', 'dealer revealed after settlement');
     assert.match(await page.locator('#stageTurn').innerText(), /Round complete/);
     await page.screenshot({ path: destination + '/' + device.name + '-settlement.png', fullPage: true });
