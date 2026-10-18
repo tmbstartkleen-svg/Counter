@@ -34,6 +34,9 @@ jobs:
       - name: Verify live surrender decision and half-stake payout
         timeout-minutes: 4
         run: node scripts/live-surrender-browser.mjs
+      - name: Verify live insurance wager and payout
+        timeout-minutes: 4
+        run: node scripts/live-insurance-browser.mjs
       - name: Preserve screenshots
         if: always()
         uses: actions/upload-artifact@v4
