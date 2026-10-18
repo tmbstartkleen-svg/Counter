@@ -37,7 +37,7 @@ test('ledger: insurance offsets main-hand loss on dealer natural',()=>{
  assertLedger('insured',{players:[player('a',{bank:962.5,cards:['10','9'],insurance:12.5})],dealer:['A','K']},{a:{bank:1000,status:'loss'}});
 });
 test('ledger: insurance loses if dealer has no natural, while main hand pushes',()=>{
- assertLedger('insurance loss',{players:[player('a',{bank:962.5,cards:['10','8'],insurance:12.5})],dealer:['A','7']},{a:{bank:1012.5,status:'win'}});
+ assertLedger('insurance loss',{players:[player('a',{bank:962.5,cards:['10','8'],insurance:12.5})],dealer:['A','7']},{a:{bank:987.5,status:'push'}});
 });
 test('ledger: split hand winner and loser settle separately with no natural bonus',()=>{
  assertLedger('split mixed',{players:[player('a',{bank:950,wager:25,hands:[hand(['A','K']),hand(['10','8'])]})],dealer:['10','9']},{a:{bank:1000,status:'win / loss'}});
