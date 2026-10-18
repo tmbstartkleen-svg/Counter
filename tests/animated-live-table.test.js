@@ -10,3 +10,5 @@ test('payout indicator provides accessible description',()=>{assert.match(readFi
 test('shoe-to-seat card animations are seat staggered and motion-safe',()=>{const js=readFileSync('public/v33-live-table.js','utf8'),css=readFileSync('public/v33-live-table.css','utf8');assert.match(js,/stage-shoe/);assert.match(js,/seatIndex\+i\*4/);assert.match(js,/--deal-delay/);assert.match(css,/stage-card-flight/);assert.match(css,/animation-delay:var\(--deal-delay/);assert.match(css,/prefers-reduced-motion/);});
 
 test('shoe-to-seat effect stays decorative and uses real server cards',()=>{const js=readFileSync('public/v33-live-table.js','utf8');assert.match(js,/\(s\.dealer\|\|\[\]\)\.map/);assert.match(js,/cards\.map\(\(c,i\)=>card\(/);assert.match(js,/aria-hidden="true"/);});
+
+test('dealer arm gestures only on fresh multiplayer cards',()=>{const js=readFileSync('public/v33-live-table.js','utf8'),css=readFileSync('public/v33-live-table.css','utf8');assert.match(js,/stage-arm/);assert.match(js,/hasNewCards=/);assert.match(js,/dealing-cards/);assert.match(css,/stage-dealer-reach/);assert.match(css,/prefers-reduced-motion/);});
