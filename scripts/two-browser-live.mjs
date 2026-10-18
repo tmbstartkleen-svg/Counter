@@ -61,15 +61,6 @@ try {
     assert.ok(await page.locator('#stageDealerScore').innerText(),'dealer score visible');
   }
   // Reload the mobile guest's page: sessionStorage should retain its resume token.
-  const before=await pages[1].evaluate(room=>({
-    token:sessionStorage.getItem('blackedge-seat-'+room),
-    bank:window.last?.players?.find(p=>p.id===window.last?.playerId)?.bank,
-    playerId:window.last?.playerId,
-    count:window.last?.players?.length
-  }),room);
-  assert.ok(before.token,'mobile guest has a stored resume token');
-  assert.equal(before.count,2,'both seats exist before reconnect');
-  // The inline game script keeps 'last' in top-level lexical scope, not on window.
   const identity=await pages[1].evaluate(room=>({
     token:sessionStorage.getItem('blackedge-seat-'+room),
     id:last?.playerId,
