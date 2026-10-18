@@ -31,7 +31,7 @@ try{
   // already completed round). The server must never leave an abandoned action blocking play.
   const phase=await pages[0].evaluate(()=>last.phase);
   await pages[1].reload({waitUntil:'load'});
-  await pages[0].waitForFunction(()=>last?.players?.some(p=>p.id!==last.playerId&&!p.connected)||last?.phase==='complete');
+  await pages[0].waitForFunction(()=>last?.players?.some(p=>p.id!==last.playerId&&!p.connected));
   const state=await pages[0].evaluate(()=>last);
   const offline=state.players.find(p=>p.id===guest.id);
   assert.ok(offline,'guest reserved seat remains after disconnection');
@@ -51,7 +51,7 @@ try{
     else if(info.stand)await pages[0].locator('#stand').evaluate(el=>el.click());
     await pages[0].waitForTimeout(250);
   }
-  await pages[0].waitForFunction(()=>last?.phase==='complete',{timeout:20000});
+  await pages[0].waitForFunction(()=>last?.phase==='complete');
   await pages[1].locator('#join').click();
   await pages[1].waitForFunction(()=>last?.phase==='complete'&&last?.players?.length===2&&last?.players?.every(p=>p.connected));
   const resumed=await pages[1].evaluate(room=>({
