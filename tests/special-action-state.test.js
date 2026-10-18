@@ -41,11 +41,11 @@ test('finishing first split hand advances to second hand, not next player',()=>{
 test('split aces each receive one card and automatically stand',()=>{
  const {room,player}=setup({cards:['A','A']});
  room.action(player,{type:'split'});
- assert.equal(player.bank,950);
+ assert.equal(player.bank,975); // first split hand pushes dealer 17; second loses
  assert.equal(player.hands.length,2);
  assert.equal(player.hands[0].cards.length,2);
  assert.equal(player.hands[1].cards.length,2);
- assert.ok(player.hands.every(h=>h.status==='Stand'));
+ assert.ok(player.hands.every(h=>h.status==='push'||h.status==='loss'));
  assert.equal(room.phase,'complete');
 });
 test('surrender settles half of the reserved stake',()=>{
