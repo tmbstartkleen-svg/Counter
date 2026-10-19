@@ -16,6 +16,10 @@ try {
     page.on('pageerror', error => errors.push(device.name + ': ' + error.message));
     await page.goto(origin + '/online.html', { waitUntil: 'load' });
     await page.waitForFunction(() => typeof window.BlackEdgeVisual?.render === 'function');
+    assert.equal(await page.locator('#betaHelp summary').count(),1,'onboarding guide is available');
+    await page.locator('#betaHelp summary').click();
+    assert.match(await page.locator('#betaHelp').innerText(),/Virtual chips have no cash value/);
+    assert.match(await page.locator('#playerHint').innerText(),/Enter a room code/);
     const state = {
       phase: 'turn', round: 3, playerId: 'one', turnId: 'one',
       message: 'Playing split hands', dealer: [{ r:'10',s:'S' },{hidden:true}],
@@ -28,7 +32,8 @@ try {
           cards:[{r:'K',s:'C'},{r:'9',s:'D'}] }
       ]
     };
-    await page.evaluate(s => window.BlackEdgeVisual.render(s), state);
+    await page.evaluate(s => render(s), state);
+    assert.match(await page.locator('#playerHint').innerText(),/Your turn/,'active player receives actionable guidance');
     assert.equal(await page.locator('.stage-seat').count(),4,'table displays four possible seats');
     assert.equal(await page.locator('.stage-seat .stage-person').count(),2,'only occupied seats show people');
     assert.equal(await page.locator('.stage-seat').filter({hasText:'Open seat'}).count(),2,'two open seats visible');
@@ -51,7 +56,8 @@ try {
     turnChanged.players[0].status = 'Stand';
     turnChanged.players[0].hands[1].status = 'Stand';
     turnChanged.players[1].status = 'Playing';
-    await page.evaluate(next => window.BlackEdgeVisual.render(next), turnChanged);
+    await page.evaluate(next => render(next), turnChanged);
+    assert.match(await page.locator('#playerHint').innerText(),/Another player/,'waiting player receives accurate message');
     assert.equal(await page.locator('.stage-split-hand.current').count(), 0, 'old split hand no longer active');
     assert.match(await page.locator('#stageTurn').innerText(), /Turn: Bob/, 'turn passed to second player');
 
