@@ -50,7 +50,7 @@ test('active-round reconnect preserves seat without granting new player a seat',
   await room.handle(a, { type: 'join' });
   await room.handle(b, { type: 'join' });
   room.phase = 'turn';
-  room.turn = 1;
+  room.turn = 0;
   room.players.get('b').status = 'Playing';
   const previousSocket = b.socket;
   room.leave(b);
