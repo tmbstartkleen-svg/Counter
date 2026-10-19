@@ -30,6 +30,12 @@ jobs:
           curl -fLsS --retry 3 --connect-timeout 15 "$BASE/v33-live-table.css" -o table.css
           grep -q 'v33-live-table.js' online.html
           grep -q 'BlackEdgeVisual' table.js
+          # The deployed script must match the beta fix: avatars only belong to occupied seats.
+          grep -Fq 'if(p)el.append(person(i))' table.js
+          if grep -Fq 'el.append(person(i));const name=' table.js; then
+            echo 'Deployed table still renders avatars for vacant seats.' >&2
+            exit 1
+          fi
           grep -q 'stage-felt' table.css
           echo "Public health and animated table assets passed." >> "$GITHUB_STEP_SUMMARY"
       - name: Verify deployed Worker rejects foreign browser WebSocket origins
