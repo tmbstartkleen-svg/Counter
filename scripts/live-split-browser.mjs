@@ -35,7 +35,8 @@ try{
      const dealt=await page.evaluate(()=>({
        phase:last.phase,bank:last.players[0].bank,activeHand:last.players[0].activeHand,hands:last.players[0].hands
      }));
-     assert.equal(dealt.bank,state.bank-state.wager,'second stake reserved exactly once');
+     if(dealt.phase==='turn')assert.equal(dealt.bank,state.bank-state.wager,'second stake reserved exactly once before settlement');
+     // Splitting aces settles immediately: the first state already includes payouts.
      assert.equal(dealt.hands.length,2);
      assert.equal(await page.locator('.stage-split-hand').count(),2,'two separate live hand panels');
      assert.equal(dealt.hands[0].wager,state.wager);
@@ -56,7 +57,7 @@ try{
      await page.waitForFunction(()=>last.phase==='complete');
      const result=await page.evaluate(()=>({bank:last.players[0].bank,hands:last.players[0].hands,dealer:last.dealer,status:last.players[0].status}));
      const outcomes=result.hands.map(h=>settleHand({cards:h.cards,dealerCards:result.dealer,wager:h.wager,splitHand:true}));
-     assert.equal(result.bank,dealt.bank+outcomes.reduce((sum,o)=>sum+o.payout,0),
+     assert.equal(result.bank,(dealt.phase==='complete'?state.bank-state.wager:dealt.bank)+outcomes.reduce((sum,o)=>sum+o.payout,0),
        'live virtual-chip bank equals independent settlement of both split hands');
      assert.deepEqual(result.hands.map(h=>h.status),outcomes.map(o=>o.result),'per-hand outcomes agree');
      assert.equal(await page.locator('.stage-split-hand').count(),2,'separate hand panels survive settlement');
