@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlackEdge Elite | Beta Playtest Checklist</title>
+<style>
+:root{color-scheme:dark}body{margin:0;padding:20px;background:#071910;color:#f2ead7;font:16px/1.5 system-ui,sans-serif}main{max-width:760px;margin:0 auto}h1{color:#eac278}a{color:#edcf8c}.panel{padding:18px 22px;background:#113523;border:1px solid #557355;border-radius:14px;margin:18px 0}label{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #ffffff16}label:last-child{border:0}input[type=checkbox]{width:20px;height:20px;flex-shrink:0;accent-color:#eac278;margin-top:3px}button{padding:12px 18px;border-radius:9px;border:1px solid #9bb78c;background:#234c32;color:#fff;font:inherit;cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #eac278;outline-offset:3px}.muted{color:#c6d4c3}textarea{box-sizing:border-box;width:100%;min-height:110px;border-radius:8px;background:#092416;color:white;border:1px solid #8ba48a;padding:12px;font:inherit}</style></head>
+<body><main><p><a href="/online.html">← Back to multiplayer table</a></p><h1>Controlled Beta Playtest</h1><p class="muted">For two to four people on separate browsers or devices. Use virtual chips only. Check each scenario when observed; a check is not an automated certification. Nothing entered here is uploaded.</p>
+<section class="panel" aria-labelledby="setup"><h2 id="setup">1. Join and invite</h2>
+<label><input type="checkbox">A host creates a room and another player joins the same room by invite link.</label>
+<label><input type="checkbox">The table shows the correct number of online players, and unoccupied seats stay empty.</label>
+<label><input type="checkbox">The host can deal; a guest cannot start a round.</label>
+</section>
+<section class="panel" aria-labelledby="round"><h2 id="round">2. Take turns</h2>
+<label><input type="checkbox">Each joined player sees their two cards and the dealer's concealed hole card.</label>
+<label><input type="checkbox">Only the active player can use Hit, Stand or other eligible actions.</label>
+<label><input type="checkbox">Turn order advances to the next player, and the dealer finishes the round.</label>
+<label><input type="checkbox">Virtual-chip balances and winnings update after settlement.</label>
+</section>
+<section class="panel" aria-labelledby="special"><h2 id="special">3. Special actions (when offered)</h2>
+<label><input type="checkbox">A matching pair can split into two separately displayed hands.</label>
+<label><input type="checkbox">Insurance or Skip Insurance is offered when the dealer reveals an Ace.</label>
+<label><input type="checkbox">Eligible Double or Surrender controls behave as explained by the game.</label>
+</section>
+<section class="panel" aria-labelledby="resilience"><h2 id="resilience">4. Resilience and mobile usability</h2>
+<label><input type="checkbox">Refresh the guest browser and rejoin with the same room code: the original seat returns, without duplication.</label>
+<label><input type="checkbox">Disconnect during a hand: the connected player can finish without becoming stuck.</label>
+<label><input type="checkbox">On a narrow phone screen, buttons, cards and the active-turn message remain readable without sideways scrolling.</label>
+<label><input type="checkbox">Opening an invite link on another device never shares the original player's stored seat token.</label>
+</section>
+<section class="panel"><h2>Results</h2><p id="progress" role="status" aria-live="polite">0 of 14 scenarios checked.</p><label for="notes">Defects or feedback (keep personal information out)</label><textarea id="notes" placeholder="Which device, room scenario, expected behavior, actual behavior?"></textarea><p><button id="copyReport" type="button">Copy test report</button> <button id="clear" type="button">Reset checklist</button></p><p id="copyStatus" class="muted" role="status" aria-live="polite"></p></section>
+<p class="muted">Do not paste session tokens, personal contact information or room invitations into public bug reports. This is a virtual-chip training and social-play beta, with no prizes or real-money betting.</p>
+</main><script>
+const checks=[...document.querySelectorAll('input[type=checkbox]')],progress=document.getElementById('progress'),status=document.getElementById('copyStatus');
+function refresh(){progress.textContent=checks.filter(c=>c.checked).length+' of '+checks.length+' scenarios checked.'}
+for(const box of checks)box.addEventListener('change',refresh);
+document.getElementById('clear').addEventListener('click',()=>{checks.forEach(c=>c.checked=false);document.getElementById('notes').value='';status.textContent='';refresh()});
+document.getElementById('copyReport').addEventListener('click',async()=>{const lines=['BlackEdge controlled beta acceptance report','Completed '+checks.filter(c=>c.checked).length+'/'+checks.length+' scenarios',...checks.map((c,i)=>(c.checked?'PASS':'NOT VERIFIED')+' '+(i+1)+'. '+c.parentElement.textContent.trim()),'Feedback:',document.getElementById('notes').value.trim()];try{await navigator.clipboard.writeText(lines.join('\n'));status.textContent='Report copied. Review it before sharing.'}catch{status.textContent='Copy unavailable in this browser. You can select your notes and copy them manually.'}});
+refresh();
+</script></body></html>

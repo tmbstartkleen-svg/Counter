@@ -117,6 +117,21 @@ try {
     assert.equal(await page.locator('.stage-card').count(), 6, 'all cards remain visible with motion disabled');
     assert.match(await page.locator('#stageTurn').innerText(), /Your turn/);
 
+    // Beta participant checklist is directly accessible and remains local to the browser.
+    await page.goto(origin + '/beta-test.html', { waitUntil: 'load' });
+    assert.match(await page.title(), /Beta Playtest Checklist/);
+    const cases = page.locator('input[type=checkbox]');
+    assert.equal(await cases.count(), 14, 'all fourteen beta acceptance scenarios are listed');
+    assert.match(await page.locator('#progress').innerText(), /0 of 14/);
+    await cases.nth(0).check();
+    await cases.nth(1).check();
+    assert.match(await page.locator('#progress').innerText(), /2 of 14/);
+    await page.locator('#notes').fill('Testing a disconnected player');
+    await page.locator('#clear').click();
+    assert.match(await page.locator('#progress').innerText(), /0 of 14/,'reset clears all checks');
+    assert.equal(await page.locator('#notes').inputValue(),'','reset clears local feedback');
+    await page.screenshot({path:destination+'/'+device.name+'-beta-checklist.png',fullPage:true});
+
     await page.close();
     console.log('PASS ' + device.name + ' live table: split hands, turn transition, payout, repeat round and motion setting');
   }
