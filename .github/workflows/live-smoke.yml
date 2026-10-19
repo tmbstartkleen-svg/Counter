@@ -38,7 +38,7 @@ jobs:
           set -euo pipefail
           BASE="https://counter.tmbstartkleen.workers.dev"
           ROOM="origin-check-${GITHUB_RUN_ID}"
-          CODE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 \
+          CODE=$(curl --http1.1 -sS -o /dev/null -w '%{http_code}' --max-time 20 \
             -H 'Connection: Upgrade' -H 'Upgrade: websocket' \
             -H 'Sec-WebSocket-Version: 13' -H 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==' \
             -H 'Origin: https://untrusted.example' \
