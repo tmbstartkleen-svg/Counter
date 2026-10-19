@@ -45,12 +45,13 @@ test('host handoff after disconnect prevents stale socket from acting', async ()
   const r = room(), alice = connection('alice'), bob = connection('bob');
   await r.handle(alice, { type: 'join' });
   await r.handle(bob, { type: 'join' });
+  const staleSocket = alice.socket;
   r.leave(alice);
   assert.equal(r.host, 'bob');
   const returning = connection('returning');
   await r.handle(returning, { type: 'resume', token: alice.token });
   assert.equal(r.host, 'bob');
-  await assert.rejects(r.handle(alice, { type: 'name', name: 'Stale' }), /no longer active/);
+  await assert.rejects(r.handle({ ...alice, socket: staleSocket }, { type: 'name', name: 'Stale' }), /no longer active/);
   await r.handle(returning, { type: 'leaveRoom' });
   assert.equal(r.players.has('alice'), false);
   assert.equal(r.host, 'bob');
