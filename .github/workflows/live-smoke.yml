@@ -29,6 +29,11 @@ jobs:
           curl -fLsS --retry 3 --connect-timeout 15 "$BASE/v33-live-table.js" -o table.js
           curl -fLsS --retry 3 --connect-timeout 15 "$BASE/v33-live-table.css" -o table.css
           grep -q 'v33-live-table.js' online.html
+          # Detect stale releases that omit the Build #33 first-time-player experience.
+          grep -Fq 'id="betaHelp"' online.html
+          grep -Fq 'id="playerHint"' online.html
+          grep -Fq 'Virtual chips have no cash value' online.html
+          grep -Fq 'Another player is acting.' online.html
           grep -q 'BlackEdgeVisual' table.js
           # The deployed script must match the beta fix: avatars only belong to occupied seats.
           grep -Fq 'if(p)el.append(person(i))' table.js
