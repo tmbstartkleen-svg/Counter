@@ -29,6 +29,10 @@ try {
       ]
     };
     await page.evaluate(s => window.BlackEdgeVisual.render(s), state);
+    assert.equal(await page.locator('.stage-seat').count(),4,'table displays four possible seats');
+    assert.equal(await page.locator('.stage-seat .stage-person').count(),2,'only occupied seats show people');
+    assert.equal(await page.locator('.stage-seat').filter({hasText:'Open seat'}).count(),2,'two open seats visible');
+    assert.equal(await page.locator('.stage-seat').filter({hasText:'Open seat'}).locator('.stage-person').count(),0,'open seats never render fake players');
     assert.equal(await page.locator('.stage-split-hand').count(), 2, 'both split hands visible');
     assert.equal(await page.locator('.stage-split-hand.current').count(), 1, 'exactly one active split hand');
     assert.match(await page.locator('#stageTurn').innerText(), /Your turn/);
