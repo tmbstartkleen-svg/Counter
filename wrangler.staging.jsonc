@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "counter-beta-staging",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-15",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "durable_objects": {
+    "bindings": [{"name": "BLACKJACK_ROOMS", "class_name": "BlackjackRoom"}]
+  },
+  "migrations": [{"tag": "v1", "new_sqlite_classes": ["BlackjackRoom"]}]
+}
