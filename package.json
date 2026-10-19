@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "check": "node --check src/worker.js && node --check src/blackjack-rules.js && node --check v13-academy.js && node --check v14-practice-room.js && npm test",
+    "check": "node --check src/worker.js && node --check src/blackjack-rules.js && node --check v13-academy.js && node --check v14-practice-room.js && node --check v25-guided.js && node --check v26-progress.js && node --check v29-speed-academy.js && node --check public/v29-speed-academy.js && node --check v30-shoe-academy.js && node --check public/v30-shoe-academy.js && node --check v31-adaptive-coach.js && node --check public/v31-adaptive-coach.js && node --check v32-academy-layout.js && node --check public/v32-academy-layout.js && node --check v33-live-table.js && node --check public/v33-live-table.js && npm test",
     "test": "node --test tests/*.test.js"
   },
   "devDependencies": {
