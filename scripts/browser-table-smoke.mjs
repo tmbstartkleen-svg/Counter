@@ -16,6 +16,21 @@ try {
     page.on('pageerror', error => errors.push(device.name + ': ' + error.message));
     await page.goto(origin + '/online.html', { waitUntil: 'load' });
     await page.waitForFunction(() => typeof window.BlackEdgeVisual?.render === 'function');
+    assert.equal(await page.locator('a[href="/beta-test.html"]').count(),1,'beta checklist linked from table');
+    const beta=await browser.newPage({viewport:{width:device.width,height:device.height}});
+    beta.on('pageerror', error => errors.push(device.name+' beta: '+error.message));
+    await beta.goto(origin+'/beta-test.html',{waitUntil:'load'});
+    assert.equal(await beta.locator('input[type="checkbox"]').count(),14,'14 beta scenarios visible');
+    await beta.locator('input[type="checkbox"]').first().check();
+    assert.match(await beta.locator('#progress').innerText(),/^1 of 14 scenarios checked/);
+    await beta.locator('#notes').fill('Test feedback');
+    await beta.locator('#clear').click();
+    assert.match(await beta.locator('#progress').innerText(),/^0 of 14 scenarios checked/,'checklist reset clears progress');
+    assert.equal(await beta.locator('#notes').inputValue(),'','reset clears notes');
+    const betaWidths=await beta.evaluate(()=>({viewport:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+    assert.ok(betaWidths.scroll<=betaWidths.viewport+1,'beta checklist fits '+device.name+' screen');
+    await beta.close();
+
     assert.equal(await page.locator('#betaHelp summary').count(),1,'onboarding guide is available');
     await page.locator('#betaHelp summary').click();
     assert.match(await page.locator('#betaHelp').innerText(),/Virtual chips have no cash value/);
