@@ -32,5 +32,17 @@ jobs:
           grep -q 'BlackEdgeVisual' table.js
           grep -q 'stage-felt' table.css
           echo "Public health and animated table assets passed." >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify deployed Worker rejects foreign browser WebSocket origins
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://counter.tmbstartkleen.workers.dev"
+          ROOM="origin-check-${GITHUB_RUN_ID}"
+          CODE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 \
+            -H 'Connection: Upgrade' -H 'Upgrade: websocket' \
+            -H 'Origin: https://untrusted.example' \
+            "$BASE/api/rooms/$ROOM/ws")
+          test "$CODE" = "403" || { echo "Cross-origin WebSocket request returned $CODE; expected HTTP 403"; exit 1; }
+          echo "Live origin rejection verified: HTTP $CODE" >> "$GITHUB_STEP_SUMMARY"
       - name: Verify two real WebSocket players share room state
         run: node scripts/staging-smoke.mjs "https://counter.tmbstartkleen.workers.dev"
