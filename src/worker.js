@@ -8,6 +8,12 @@ export default {
   const match=url.pathname.match(/^\/api\/rooms\/([a-zA-Z0-9_-]{4,40})\/ws$/);
   if(!match)return new Response('Not found',{status:404});
   if(request.headers.get('Upgrade')?.toLowerCase()!=='websocket')return new Response('WebSocket upgrade required',{status:426});
+  // Browser WebSockets send Origin: reject cross-site connections to private rooms.
+  // Allow absent Origin for non-browser health/integration clients.
+  const origin=request.headers.get('Origin');
+  if(origin){let parsed;try{parsed=new URL(origin)}catch{return new Response('Forbidden origin',{status:403})}
+   if(parsed.origin!==url.origin)return new Response('Forbidden origin',{status:403});
+  }
   const id=env.BLACKJACK_ROOMS.idFromName(match[1]);
   return env.BLACKJACK_ROOMS.get(id).fetch(request);
  }
