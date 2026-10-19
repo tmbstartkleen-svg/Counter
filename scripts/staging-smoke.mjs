@@ -29,9 +29,11 @@ try{
  const welcomeA=receive(a,x=>x.type==='welcome');
  a.send(JSON.stringify({type:'join'}));const first=await welcomeA;assert.ok(first.token);
  const b=await connect();clients.push(b);
+ // Subscribe to the shared-state update before joining: the server may broadcast
+ // immediately after welcome, and awaiting welcome first would lose that event.
  const welcomeB=receive(b,x=>x.type==='welcome');
- b.send(JSON.stringify({type:'join'}));const second=await welcomeB;assert.ok(second.token);
  const statePromise=receive(b,x=>x.type==='state'&&x.players?.length===2);
+ b.send(JSON.stringify({type:'join'}));const second=await welcomeB;assert.ok(second.token);
  a.send(JSON.stringify({type:'name',name:'Smoke Player'}));
  let state=await statePromise;assert.equal(state.players.length,2);
  assert.ok(state.players.some(p=>p.id===first.playerId));assert.ok(state.players.some(p=>p.id===second.playerId));
