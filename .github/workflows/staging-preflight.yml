@@ -1,0 +1,26 @@
+name: BlackEdge Staging Preflight
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate staging configuration, source and regression tests
+        run: npm run check
+      - name: Install Wrangler without deployment
+        run: npm install --no-audit --no-fund
+      - name: Validate isolated staging Worker bundle
+        run: npx wrangler deploy --config wrangler.staging.jsonc --dry-run --outdir /tmp/blackedge-staging-preflight
+      - name: Show isolation evidence
+        run: |
+          node -e "const p=require('./wrangler.jsonc');const s=require('./wrangler.staging.jsonc');if(p.name===s.name)process.exit(1);console.log('Production:',p.name,'| staging:',s.name)"
+          echo "This workflow does not deploy or approve a public beta."
