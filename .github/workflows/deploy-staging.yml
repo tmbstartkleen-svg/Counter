@@ -33,7 +33,7 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "Missing CLOUDFLARE_ACCOUNT_ID secret"; exit 1; }
       - name: Install Wrangler and verify staging configuration
         run: |
-          npm ci --no-audit --no-fund
+          npm install --no-audit --no-fund
           npm run check
           node --input-type=module -e "import fs from 'node:fs';const p=JSON.parse(fs.readFileSync('wrangler.jsonc','utf8'));const s=JSON.parse(fs.readFileSync('wrangler.staging.jsonc','utf8'));if(p.name==='counter-beta-staging'||s.name!=='counter-beta-staging'||p.name===s.name)process.exit(1);console.log('staging Worker name verified:',s.name)"
           npx wrangler deploy --config wrangler.staging.jsonc --dry-run
