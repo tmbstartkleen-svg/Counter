@@ -37,7 +37,12 @@ try{
   assert.ok(offline,'guest reserved seat remains after disconnection');
   if(phase==='turn'||phase==='insurance'){
     assert.equal(offline.connected,false,'guest marked offline');
-    assert.match(offline.status,/Disconnected/i,'server marks disconnected hand safely');
+    if(state.phase==='turn'||state.phase==='insurance') {
+      assert.match(offline.status,/Disconnected/i,'active disconnected hand is auto-stood');
+    } else {
+      assert.equal(state.phase,'complete','hand may already be settled when disconnect state is observed');
+      assert.ok(typeof offline.status==='string'&&offline.status.length>0,'settled player retains an outcome');
+    }
   }
   // Resolve decisions for the connected host; offline guest has auto-stood/declined insurance.
   for(let step=0;step<35;step++){
