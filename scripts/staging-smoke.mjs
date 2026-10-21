@@ -14,10 +14,11 @@ async function connect(){
   ws.addEventListener('error',()=>{clearTimeout(timer);reject(Error('WebSocket connection failed'))},{once:true});
  });
 }
-function receive(ws,predicate){
+function receive(ws,predicate,label='unspecified'){
  return new Promise((resolve,reject)=>{
-  const timer=setTimeout(()=>{cleanup();reject(Error('Expected message not received'))},timeout);
-  function onMessage(e){let msg;try{msg=JSON.parse(e.data)}catch{return}if(predicate(msg)){cleanup();resolve(msg)}}
+  const observed=[];
+  const timer=setTimeout(()=>{cleanup();reject(Error('Expected '+label+' message not received; observed: '+observed.slice(-10).join(', ')))},timeout);
+  function onMessage(e){let msg;try{msg=JSON.parse(e.data)}catch{return}observed.push(msg.type+':'+(msg.phase||'')+':'+(msg.players?.length??''));if(predicate(msg)){cleanup();resolve(msg)}}
   function onClose(){cleanup();reject(Error('Socket closed before expected message'))}
   function cleanup(){clearTimeout(timer);ws.removeEventListener('message',onMessage);ws.removeEventListener('close',onClose)}
   ws.addEventListener('message',onMessage);ws.addEventListener('close',onClose,{once:true});
@@ -26,18 +27,18 @@ function receive(ws,predicate){
 const clients=[];
 try{
  const a=await connect();clients.push(a);
- const welcomeA=receive(a,x=>x.type==='welcome');
+ const welcomeA=receive(a,x=>x.type==='welcome','A welcome');
  a.send(JSON.stringify({type:'join'}));const first=await welcomeA;assert.ok(first.token);
  const b=await connect();clients.push(b);
  // Subscribe to the shared-state update before joining: the server may broadcast
  // immediately after welcome, and awaiting welcome first would lose that event.
- const welcomeB=receive(b,x=>x.type==='welcome');
- const statePromise=receive(b,x=>x.type==='state'&&x.players?.length===2);
+ const welcomeB=receive(b,x=>x.type==='welcome','B welcome');
+ const statePromise=receive(b,x=>x.type==='state'&&x.players?.length===2,'two-player state');
  b.send(JSON.stringify({type:'join'}));const second=await welcomeB;assert.ok(second.token);
  a.send(JSON.stringify({type:'name',name:'Smoke Player'}));
  let state=await statePromise;assert.equal(state.players.length,2);
  assert.ok(state.players.some(p=>p.id===first.playerId));assert.ok(state.players.some(p=>p.id===second.playerId));
- const waitState=receive(b,x=>x.type==='state'&&x.round>=1);
+ const waitState=receive(b,x=>x.type==='state'&&x.round>=1,'round started');
  a.send(JSON.stringify({type:'start'}));
  state=await waitState;assert.ok(state.phase==='turn'||state.phase==='insurance'||state.phase==='complete');
  const until=Date.now()+timeout;
